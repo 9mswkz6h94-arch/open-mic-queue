@@ -1,10 +1,26 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../context/AuthContext'
+
+const ADMIN_EMAIL = 'crystal@rainbowheart.stuio'
 
 export default function Admin() {
+  const { user } = useAuth()
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  // Check if user is admin
+  if (!user || user.email !== ADMIN_EMAIL) {
+    return (
+      <div className="admin-page">
+        <div className="error-message" style={{ padding: '24px', margin: '24px' }}>
+          <h3>Access Denied</h3>
+          <p>Only Crystal can access the queue manager.</p>
+        </div>
+      </div>
+    )
+  }
 
   useEffect(() => {
     fetchPerformers()

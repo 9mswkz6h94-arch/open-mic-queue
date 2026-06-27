@@ -1,6 +1,10 @@
 import { supabase } from '../lib/supabaseClient'
 
+const ADMIN_EMAIL = 'crystal@rainbowheart.stuio'
+
 export default function Navbar({ user, onPageChange }) {
+  const isAdmin = user && user.email === ADMIN_EMAIL
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     onPageChange('home')
@@ -18,9 +22,11 @@ export default function Navbar({ user, onPageChange }) {
               <button onClick={() => onPageChange('home')} className="btn btn-nav">
                 Queue
               </button>
-              <button onClick={() => onPageChange('admin')} className="btn btn-nav">
-                🎛️ Manage
-              </button>
+              {isAdmin && (
+                <button onClick={() => onPageChange('admin')} className="btn btn-nav">
+                  🎛️ Manage
+                </button>
+              )}
               <span className="user-email">{user.email}</span>
               <button onClick={handleLogout} className="btn btn-logout">
                 Logout
