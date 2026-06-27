@@ -33,7 +33,12 @@ export function parseSocialLinks(urlString) {
   urls.forEach(url => {
     const platform = detectSocialPlatform(url)
     if (platform) {
-      links[platform] = url
+      // Ensure website URLs have https:// protocol
+      let finalUrl = url
+      if (platform === 'website' && !url.startsWith('http')) {
+        finalUrl = 'https://' + url
+      }
+      links[platform] = finalUrl
     }
   })
 

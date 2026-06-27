@@ -64,6 +64,11 @@ export default function QueueDisplay() {
               <div key={p.id} className="performer-card on-deck">
                 <p className="position">#{idx + 1}</p>
                 <h4>{p.stage_name}</h4>
+                <p className="real-name">{p.real_name}</p>
+                <div className="songs">
+                  <p><strong>1.</strong> {p.song_1_title}</p>
+                  <p><strong>2.</strong> {p.song_2_title}</p>
+                </div>
                 <div className="social-links">
                   {p.social_links && Object.entries(p.social_links).map(([platform, url]) => (
                     <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
