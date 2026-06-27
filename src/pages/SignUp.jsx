@@ -6,6 +6,7 @@ import SignUpForm from '../components/SignUpForm'
 export default function SignUp({ onSignUpComplete }) {
   const { user } = useAuth()
   const [step, setStep] = useState(user ? 'form' : 'auth')
+  const [isLogin, setIsLogin] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,6 +18,19 @@ export default function SignUp({ onSignUpComplete }) {
     setLoading(true)
 
     try {
+      if (isLogin) {
+        // Login existing account
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (signInError) throw new Error('Email or password incorrect')
+        setStep('form')
+        return
+      }
+
+      // Sign up new account
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -55,7 +69,7 @@ export default function SignUp({ onSignUpComplete }) {
     return (
       <div className="signup-page">
         <div className="auth-form">
-          <h2>Create Your Account</h2>
+          <h2>{isLogin ? 'Log In' : 'Create Your Account'}</h2>
 
           {error && <div className="error-message">{error}</div>}
 
@@ -83,9 +97,25 @@ export default function SignUp({ onSignUpComplete }) {
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? (isLogin ? 'Logging in...' : 'Creating account...') : (isLogin ? 'Log In' : 'Create Account')}
             </button>
           </form>
+
+          <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px', color: 'var(--text-muted)' }}>
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogin(!isLogin)
+                setError('')
+                setEmail('')
+                setPassword('')
+              }}
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: '600', textDecoration: 'underline' }}
+            >
+              {isLogin ? 'Create one' : 'Log in'}
+            </button>
+          </p>
         </div>
       </div>
     )
