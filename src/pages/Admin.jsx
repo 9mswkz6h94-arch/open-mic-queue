@@ -133,6 +133,23 @@ export default function Admin() {
     }
   }
 
+  async function deletePerformer(performerId, stageName) {
+    if (!window.confirm(`Delete "${stageName}" from the queue?`)) {
+      return
+    }
+
+    try {
+      await supabase
+        .from('performers')
+        .delete()
+        .eq('id', performerId)
+
+      fetchPerformers()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   if (loading) return <div className="loading">Loading performers...</div>
 
   return (
@@ -197,6 +214,13 @@ export default function Admin() {
                 className={`btn btn-small ${p.attended ? 'btn-success' : 'btn-outline'}`}
               >
                 {p.attended ? '✓' : '○'}
+              </button>
+
+              <button
+                onClick={() => deletePerformer(p.id, p.stage_name)}
+                className="btn btn-small btn-delete"
+              >
+                ✕
               </button>
             </div>
           </div>

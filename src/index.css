@@ -547,6 +547,16 @@ body {
   color: white;
 }
 
+.btn-delete {
+  background: var(--error);
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #C92A2A;
+  transform: scale(1.1);
+}
+
 .btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
