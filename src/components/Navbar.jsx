@@ -33,9 +33,14 @@ export default function Navbar({ user, onPageChange }) {
               </button>
             </>
           ) : (
-            <button onClick={() => onPageChange('signup')} className="btn btn-primary">
-              Sign Up to Perform
-            </button>
+            <>
+              <button onClick={() => onPageChange('signup')} className="btn btn-primary">
+                Sign Up to Perform
+              </button>
+              <button onClick={() => onPageChange('admin-login')} className="btn btn-nav">
+                🎛️ Admin
+              </button>
+            </>
           )}
         </div>
       </div>

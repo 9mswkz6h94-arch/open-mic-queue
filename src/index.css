@@ -564,3 +564,44 @@ body {
 .admin-info p {
   margin: 4px 0;
 }
+
+/* Admin Login Page */
+.admin-login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+}
+
+.admin-login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 400px;
+}
+
+.admin-login-card h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-outline:hover {
+  background: var(--bg-subtle);
+}
