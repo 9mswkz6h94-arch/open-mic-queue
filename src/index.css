@@ -310,6 +310,10 @@ body {
 .performer-card.on-deck {
   padding: 16px;
   position: relative;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .position {
