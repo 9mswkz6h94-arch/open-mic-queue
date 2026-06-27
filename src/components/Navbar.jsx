@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient'
 
-const ADMIN_EMAIL = 'crystal@rainbowheart.stuio'
+const ADMIN_EMAIL = 'crystal@rainbowheart.studio'
 
 export default function Navbar({ user, onPageChange }) {
   const isAdmin = user && user.email === ADMIN_EMAIL
