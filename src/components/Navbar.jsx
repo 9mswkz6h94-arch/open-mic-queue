@@ -9,10 +9,18 @@ export default function Navbar({ user, onPageChange }) {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <h1 className="navbar-title">🎤 Open Mic Queue</h1>
+        <h1 className="navbar-title" style={{ cursor: 'pointer' }} onClick={() => onPageChange('home')}>
+          🎤 Open Mic Queue
+        </h1>
         <div className="navbar-actions">
           {user ? (
             <>
+              <button onClick={() => onPageChange('home')} className="btn btn-nav">
+                Queue
+              </button>
+              <button onClick={() => onPageChange('admin')} className="btn btn-nav">
+                🎛️ Manage
+              </button>
               <span className="user-email">{user.email}</span>
               <button onClick={handleLogout} className="btn btn-logout">
                 Logout

@@ -396,3 +396,171 @@ body {
   padding: 40px;
   color: var(--text-muted);
 }
+
+/* Admin Page */
+.admin-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.admin-page h2 {
+  margin-bottom: 24px;
+  font-size: 24px;
+}
+
+.admin-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 80px 1fr 200px 300px;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-subtle);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 200px 300px;
+  gap: 16px;
+  padding: 16px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.col-status {
+  text-align: center;
+}
+
+.col-name {
+  flex: 1;
+}
+
+.performer-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.performer-name strong {
+  font-size: 16px;
+}
+
+.performer-name small {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.col-songs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.col-songs small {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.col-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-current {
+  background: var(--success);
+  color: white;
+}
+
+.badge-attended {
+  background: var(--success);
+  color: white;
+}
+
+.badge-missed {
+  background: var(--error);
+  color: white;
+}
+
+.btn-nav {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.btn-nav:hover {
+  color: var(--primary);
+  transform: none;
+}
+
+.btn-secondary {
+  background: var(--bg-subtle);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+.btn-active {
+  background: var(--success);
+  color: white;
+}
+
+.btn-small {
+  padding: 6px 10px;
+  font-size: 12px;
+  min-width: auto;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.admin-info {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--bg-subtle);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.admin-info p {
+  margin: 4px 0;
+}
