@@ -67,13 +67,12 @@ export default function Admin() {
 
     try {
       // Find performer with position above
-      const { data: above } = await supabase
+      const { data: above, error: findError } = await supabase
         .from('performers')
         .select('id')
         .eq('queue_position', currentPos - 1)
-        .single()
 
-      if (above) {
+      if (above && above.length > 0) {
         // Swap positions
         await supabase
           .from('performers')
@@ -83,10 +82,10 @@ export default function Admin() {
         await supabase
           .from('performers')
           .update({ queue_position: currentPos })
-          .eq('id', above.id)
-      }
+          .eq('id', above[0].id)
 
-      fetchPerformers()
+        fetchPerformers()
+      }
     } catch (err) {
       setError(err.message)
     }
@@ -95,13 +94,12 @@ export default function Admin() {
   async function moveDown(performerId, currentPos) {
     try {
       // Find performer with position below
-      const { data: below } = await supabase
+      const { data: below, error: findError } = await supabase
         .from('performers')
         .select('id')
         .eq('queue_position', currentPos + 1)
-        .single()
 
-      if (below) {
+      if (below && below.length > 0) {
         // Swap positions
         await supabase
           .from('performers')
@@ -111,10 +109,10 @@ export default function Admin() {
         await supabase
           .from('performers')
           .update({ queue_position: currentPos })
-          .eq('id', below.id)
-      }
+          .eq('id', below[0].id)
 
-      fetchPerformers()
+        fetchPerformers()
+      }
     } catch (err) {
       setError(err.message)
     }
