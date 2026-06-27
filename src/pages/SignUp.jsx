@@ -24,10 +24,10 @@ export default function SignUp({ onSignUpComplete }) {
 
       if (signUpError) throw signUpError
 
-      setStep('form')
+      // Wait a moment for auth state to update
+      setTimeout(() => setStep('form'), 500)
     } catch (err) {
       setError(err.message || 'Error creating account')
-    } finally {
       setLoading(false)
     }
   }
