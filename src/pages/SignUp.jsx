@@ -24,8 +24,15 @@ export default function SignUp({ onSignUpComplete }) {
 
       if (signUpError) throw signUpError
 
-      // Wait a moment for auth state to update
-      setTimeout(() => setStep('form'), 500)
+      // Sign in immediately after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) throw signInError
+
+      setStep('form')
     } catch (err) {
       setError(err.message || 'Error creating account')
       setLoading(false)
