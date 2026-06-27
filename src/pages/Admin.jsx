@@ -72,21 +72,34 @@ export default function Admin() {
         .select('id')
         .eq('queue_position', currentPos - 1)
 
+      if (findError) {
+        console.error('Error finding performer above:', findError)
+        setError('Could not find performer above')
+        return
+      }
+
       if (above && above.length > 0) {
         // Swap positions
-        await supabase
+        const { error: err1 } = await supabase
           .from('performers')
           .update({ queue_position: currentPos - 1 })
           .eq('id', performerId)
 
-        await supabase
+        const { error: err2 } = await supabase
           .from('performers')
           .update({ queue_position: currentPos })
           .eq('id', above[0].id)
 
+        if (err1) console.error('Error moving performer:', err1)
+        if (err2) console.error('Error swapping with above:', err2)
+
+        console.log('Move up successful, refreshing...')
         fetchPerformers()
+      } else {
+        console.log('No performer found above at position', currentPos - 1)
       }
     } catch (err) {
+      console.error('Move up error:', err)
       setError(err.message)
     }
   }
