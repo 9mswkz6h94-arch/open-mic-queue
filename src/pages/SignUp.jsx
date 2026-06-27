@@ -17,14 +17,26 @@ export default function SignUp({ onSignUpComplete }) {
     setLoading(true)
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       })
 
+      // If user already registered, try to sign in instead
+      if (signUpError && signUpError.message.includes('already registered')) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (signInError) throw new Error('Account exists. Wrong password?')
+        setStep('form')
+        return
+      }
+
       if (signUpError) throw signUpError
 
-      // Sign in immediately after signup
+      // Sign in immediately after new signup
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -34,7 +46,7 @@ export default function SignUp({ onSignUpComplete }) {
 
       setStep('form')
     } catch (err) {
-      setError(err.message || 'Error creating account')
+      setError(err.message || 'Error with account')
       setLoading(false)
     }
   }
