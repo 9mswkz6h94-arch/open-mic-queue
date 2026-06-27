@@ -22,6 +22,7 @@ export default function QueueDisplay() {
     if (error) {
       console.error('Error fetching performers:', error)
     } else {
+      console.log('Fetched performers:', data)
       setPerformers(data || [])
       setLoading(false)
     }
