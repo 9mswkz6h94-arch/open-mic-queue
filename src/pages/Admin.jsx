@@ -79,7 +79,14 @@ export default function Admin() {
       }
 
       if (above && above.length > 0) {
-        // Swap positions
+        // Optimistically update UI immediately
+        setPerformers(prev => prev.map(p => {
+          if (p.id === performerId) return { ...p, queue_position: currentPos - 1 }
+          if (p.id === above[0].id) return { ...p, queue_position: currentPos }
+          return p
+        }).sort((a, b) => a.queue_position - b.queue_position))
+
+        // Update database in background
         const { error: err1 } = await supabase
           .from('performers')
           .update({ queue_position: currentPos - 1 })
@@ -90,13 +97,11 @@ export default function Admin() {
           .update({ queue_position: currentPos })
           .eq('id', above[0].id)
 
-        if (err1) console.error('Error moving performer:', err1)
-        if (err2) console.error('Error swapping with above:', err2)
-
-        console.log('Move up successful, refreshing...')
-        fetchPerformers()
-      } else {
-        console.log('No performer found above at position', currentPos - 1)
+        if (err1 || err2) {
+          console.error('Database update error:', err1 || err2)
+          setError('Error updating queue')
+          fetchPerformers() // Revert UI if error
+        }
       }
     } catch (err) {
       console.error('Move up error:', err)
@@ -113,20 +118,32 @@ export default function Admin() {
         .eq('queue_position', currentPos + 1)
 
       if (below && below.length > 0) {
-        // Swap positions
-        await supabase
+        // Optimistically update UI immediately
+        setPerformers(prev => prev.map(p => {
+          if (p.id === performerId) return { ...p, queue_position: currentPos + 1 }
+          if (p.id === below[0].id) return { ...p, queue_position: currentPos }
+          return p
+        }).sort((a, b) => a.queue_position - b.queue_position))
+
+        // Update database in background
+        const { error: err1 } = await supabase
           .from('performers')
           .update({ queue_position: currentPos + 1 })
           .eq('id', performerId)
 
-        await supabase
+        const { error: err2 } = await supabase
           .from('performers')
           .update({ queue_position: currentPos })
           .eq('id', below[0].id)
 
-        fetchPerformers()
+        if (err1 || err2) {
+          console.error('Database update error:', err1 || err2)
+          setError('Error updating queue')
+          fetchPerformers() // Revert UI if error
+        }
       }
     } catch (err) {
+      console.error('Move down error:', err)
       setError(err.message)
     }
   }
