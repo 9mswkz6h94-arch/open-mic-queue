@@ -116,15 +116,22 @@ export default function Admin() {
   }
 
   async function resetTestData() {
-    if (!window.confirm('Reset all performers and recreate test data? This cannot be undone.')) {
-      return
-    }
+    const confirmed = window.confirm(
+      'Delete ALL performers and recreate 5 test performers?\n\nThis will:\n✓ Remove everyone from the queue\n✓ Add back test performers\n\nContinue?'
+    )
+    if (!confirmed) return
 
     try {
       setLoading(true)
+      setError('')
 
       // Delete all performers
-      await supabase.from('performers').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      const { error: deleteError } = await supabase
+        .from('performers')
+        .delete()
+        .gt('queue_position', 0)
+
+      if (deleteError) throw new Error(`Delete failed: ${deleteError.message}`)
 
       // Recreate test data
       const testPerformers = [
@@ -205,12 +212,15 @@ export default function Admin() {
         },
       ]
 
-      await supabase.from('performers').insert(testPerformers)
+      const { error: insertError } = await supabase.from('performers').insert(testPerformers)
 
-      fetchPerformers()
-      setError('')
+      if (insertError) throw new Error(`Insert failed: ${insertError.message}`)
+
+      await fetchPerformers()
+      setLoading(false)
     } catch (err) {
-      setError('Error resetting test data: ' + err.message)
+      console.error('Reset error:', err)
+      setError(`❌ Reset failed: ${err.message}`)
       setLoading(false)
     }
   }
