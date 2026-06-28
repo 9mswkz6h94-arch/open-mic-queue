@@ -24,7 +24,7 @@ export default function Admin() {
 
   useEffect(() => {
     fetchPerformers()
-    const interval = setInterval(fetchPerformers, 5000)
+    const interval = setInterval(fetchPerformers, 3000)
     return () => clearInterval(interval)
   }, [])
 
@@ -62,97 +62,34 @@ export default function Admin() {
     }
   }
 
-  async function moveUp(performerId, currentPos) {
-    if (currentPos <= 1) return
-
+  async function skipPerformer(performerId) {
     try {
-      // Find performer with position above
-      const { data: above, error: findError } = await supabase
+      // Mark as attended (performed)
+      await supabase
         .from('performers')
-        .select('id')
-        .eq('queue_position', currentPos - 1)
+        .update({ attended: true, current: false })
+        .eq('id', performerId)
 
-      if (findError) {
-        console.error('Error finding performer above:', findError)
-        setError('Could not find performer above')
-        return
+      // Mark next performer as current
+      const nextPerformer = performers.find(p => !p.attended && p.id !== performerId)
+      if (nextPerformer) {
+        await supabase
+          .from('performers')
+          .update({ current: true })
+          .eq('id', nextPerformer.id)
       }
 
-      if (above && above.length > 0) {
-        // Optimistically update UI immediately
-        setPerformers(prev => prev.map(p => {
-          if (p.id === performerId) return { ...p, queue_position: currentPos - 1 }
-          if (p.id === above[0].id) return { ...p, queue_position: currentPos }
-          return p
-        }).sort((a, b) => a.queue_position - b.queue_position))
-
-        // Update database in background
-        const { error: err1 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos - 1 })
-          .eq('id', performerId)
-
-        const { error: err2 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos })
-          .eq('id', above[0].id)
-
-        if (err1 || err2) {
-          console.error('Database update error:', err1 || err2)
-          setError('Error updating queue')
-          fetchPerformers() // Revert UI if error
-        }
-      }
+      fetchPerformers()
     } catch (err) {
-      console.error('Move up error:', err)
       setError(err.message)
     }
   }
 
-  async function moveDown(performerId, currentPos) {
-    try {
-      // Find performer with position below
-      const { data: below, error: findError } = await supabase
-        .from('performers')
-        .select('id')
-        .eq('queue_position', currentPos + 1)
-
-      if (below && below.length > 0) {
-        // Optimistically update UI immediately
-        setPerformers(prev => prev.map(p => {
-          if (p.id === performerId) return { ...p, queue_position: currentPos + 1 }
-          if (p.id === below[0].id) return { ...p, queue_position: currentPos }
-          return p
-        }).sort((a, b) => a.queue_position - b.queue_position))
-
-        // Update database in background
-        const { error: err1 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos + 1 })
-          .eq('id', performerId)
-
-        const { error: err2 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos })
-          .eq('id', below[0].id)
-
-        if (err1 || err2) {
-          console.error('Database update error:', err1 || err2)
-          setError('Error updating queue')
-          fetchPerformers() // Revert UI if error
-        }
-      }
-    } catch (err) {
-      console.error('Move down error:', err)
-      setError(err.message)
-    }
-  }
-
-  async function markAttended(performerId, attended) {
+  async function markPerformed(performerId) {
     try {
       await supabase
         .from('performers')
-        .update({ attended })
+        .update({ attended: true })
         .eq('id', performerId)
 
       fetchPerformers()
@@ -178,86 +115,127 @@ export default function Admin() {
     }
   }
 
-  if (loading) return <div className="loading">Loading performers...</div>
+  if (loading) return <div className="loading">Loading queue...</div>
+
+  const currentPerformer = performers.find(p => p.current)
+  const upcomingPerformers = performers.filter(p => !p.attended && !p.current)
+  const completedPerformers = performers.filter(p => p.attended)
 
   return (
     <div className="admin-page">
-      <h2>🎤 Queue Manager (Crystal's Controls)</h2>
+      <h2>🎤 Live Queue Manager</h2>
 
       {error && <div className="error-message">{error}</div>}
 
-      <div className="admin-table">
-        <div className="table-header">
-          <div className="col-status">Status</div>
-          <div className="col-name">Performer</div>
-          <div className="col-songs">Songs</div>
-          <div className="col-actions">Actions</div>
-        </div>
-
-        {performers.map((p, idx) => (
-          <div key={p.id} className="table-row">
-            <div className="col-status">
-              {p.current && <span className="badge badge-current">🎤 ON</span>}
-              {p.attended === true && <span className="badge badge-attended">✓</span>}
-              {p.attended === false && <span className="badge badge-missed">✗</span>}
-            </div>
-
-            <div className="col-name">
-              <div className="performer-name">
-                <strong>{p.stage_name}</strong>
-                <small>{p.real_name}</small>
+      {/* Currently Performing */}
+      {currentPerformer ? (
+        <div className="queue-progress">
+          <div className="current-section">
+            <div className="status-label">NOW PERFORMING</div>
+            <div className="performer-card current-large">
+              <h3>{currentPerformer.stage_name}</h3>
+              <p className="real-name">{currentPerformer.real_name}</p>
+              <div className="songs-list">
+                <p><strong>1.</strong> {currentPerformer.song_1_title}</p>
+                <p><strong>2.</strong> {currentPerformer.song_2_title}</p>
+              </div>
+              <div className="button-group">
+                <button
+                  onClick={() => skipPerformer(currentPerformer.id)}
+                  className="btn btn-primary"
+                >
+                  Mark Performed → Next
+                </button>
+                <button
+                  onClick={() => deletePerformer(currentPerformer.id, currentPerformer.stage_name)}
+                  className="btn btn-delete btn-small"
+                >
+                  Delete
+                </button>
               </div>
             </div>
-
-            <div className="col-songs">
-              <small>1. {p.song_1_title}</small>
-              <small>2. {p.song_2_title}</small>
-            </div>
-
-            <div className="col-actions">
-              <button
-                onClick={() => markCurrent(p.id)}
-                className={`btn ${p.current ? 'btn-active' : 'btn-secondary'}`}
-              >
-                {p.current ? 'Now Playing' : 'Mark Current'}
-              </button>
-
-              <button
-                onClick={() => moveUp(p.id, p.queue_position)}
-                className="btn btn-small"
-                disabled={p.queue_position <= 1}
-              >
-                ↑
-              </button>
-
-              <button
-                onClick={() => moveDown(p.id, p.queue_position)}
-                className="btn btn-small"
-              >
-                ↓
-              </button>
-
-              <button
-                onClick={() => markAttended(p.id, !p.attended)}
-                className={`btn btn-small ${p.attended ? 'btn-success' : 'btn-outline'}`}
-              >
-                {p.attended ? '✓' : '○'}
-              </button>
-
-              <button
-                onClick={() => deletePerformer(p.id, p.stage_name)}
-                className="btn btn-small btn-delete"
-              >
-                ✕
-              </button>
-            </div>
           </div>
-        ))}
+        </div>
+      ) : (
+        <div className="queue-progress">
+          <div className="current-section empty">
+            <p>No performer currently on stage</p>
+            {upcomingPerformers.length > 0 && (
+              <button
+                onClick={() => markCurrent(upcomingPerformers[0].id)}
+                className="btn btn-primary"
+              >
+                Start First Performer
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Queue List */}
+      <div className="queue-list-admin">
+        <h3>📋 Up Next ({upcomingPerformers.length})</h3>
+        {upcomingPerformers.length === 0 ? (
+          <p className="empty-queue">No more performers in queue</p>
+        ) : (
+          <div className="queue-items">
+            {upcomingPerformers.map((p, idx) => (
+              <div key={p.id} className="queue-item">
+                <div className="queue-position">#{idx + 1}</div>
+                <div className="queue-info">
+                  <div className="performer-info">
+                    <strong>{p.stage_name}</strong>
+                    <small>{p.real_name}</small>
+                  </div>
+                  <div className="songs-small">
+                    {p.song_1_title} / {p.song_2_title}
+                  </div>
+                </div>
+                <div className="queue-actions">
+                  <button
+                    onClick={() => markCurrent(p.id)}
+                    className="btn btn-primary btn-small"
+                  >
+                    Start
+                  </button>
+                  <button
+                    onClick={() => markPerformed(p.id)}
+                    className="btn btn-success btn-small"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={() => deletePerformer(p.id, p.stage_name)}
+                    className="btn btn-delete btn-small"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
+      {/* Completed */}
+      {completedPerformers.length > 0 && (
+        <div className="queue-list-completed">
+          <h3>✓ Already Performed ({completedPerformers.length})</h3>
+          <div className="completed-items">
+            {completedPerformers.map((p) => (
+              <div key={p.id} className="completed-item">
+                <span className="check-mark">✓</span>
+                <span className="performer-name">{p.stage_name}</span>
+                <span className="real-name-small">{p.real_name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="admin-info">
-        <p>Total performers: {performers.length}</p>
-        <p>Currently on: {performers.find(p => p.current)?.stage_name || 'None'}</p>
+        <p>Total in queue: {performers.length}</p>
+        <p>Still to go: {upcomingPerformers.length}</p>
       </div>
     </div>
   )

@@ -592,6 +592,218 @@ body {
   margin: 4px 0;
 }
 
+/* New Admin Queue Progress UI */
+.queue-progress {
+  margin-bottom: 32px;
+}
+
+.current-section {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid var(--success);
+}
+
+.current-section.empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 24px;
+  border-left-color: var(--border);
+}
+
+.status-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.performer-card.current-large {
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+  color: white;
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.performer-card.current-large h3 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.performer-card.current-large .real-name {
+  opacity: 0.95;
+  margin-bottom: 16px;
+}
+
+.performer-card.current-large .songs-list {
+  margin-bottom: 20px;
+}
+
+.performer-card.current-large .songs-list p {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.queue-list-admin {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.queue-list-admin h3 {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.queue-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+  border-left: 4px solid var(--primary);
+}
+
+.queue-position {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--primary);
+  min-width: 40px;
+  text-align: center;
+}
+
+.queue-info {
+  flex: 1;
+}
+
+.performer-info {
+  margin-bottom: 6px;
+}
+
+.performer-info strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.performer-info small {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.songs-small {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.queue-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.empty-queue {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.queue-list-completed {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.queue-list-completed h3 {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+}
+
+.completed-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.completed-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-subtle);
+  border-radius: 6px;
+  opacity: 0.7;
+}
+
+.check-mark {
+  font-weight: 700;
+  color: var(--success);
+  font-size: 18px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.performer-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.real-name-small {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .queue-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .queue-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .performer-card.current-large h3 {
+    font-size: 24px;
+  }
+
+  .button-group {
+    width: 100%;
+  }
+
+  .button-group .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
 /* Admin Login Page */
 .admin-login-page {
   display: flex;
