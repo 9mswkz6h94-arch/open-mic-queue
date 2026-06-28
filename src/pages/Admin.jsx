@@ -85,6 +85,80 @@ export default function Admin() {
     }
   }
 
+  async function moveUp(performerId, currentPos) {
+    if (currentPos <= 1) return
+
+    try {
+      const { data: above } = await supabase
+        .from('performers')
+        .select('id')
+        .eq('queue_position', currentPos - 1)
+
+      if (above && above.length > 0) {
+        // Optimistically update UI
+        setPerformers(prev => prev.map(p => {
+          if (p.id === performerId) return { ...p, queue_position: currentPos - 1 }
+          if (p.id === above[0].id) return { ...p, queue_position: currentPos }
+          return p
+        }).sort((a, b) => a.queue_position - b.queue_position))
+
+        // Update database
+        const { error: err1 } = await supabase
+          .from('performers')
+          .update({ queue_position: currentPos - 1 })
+          .eq('id', performerId)
+
+        const { error: err2 } = await supabase
+          .from('performers')
+          .update({ queue_position: currentPos })
+          .eq('id', above[0].id)
+
+        if (err1 || err2) {
+          setError('Error moving performer')
+          fetchPerformers()
+        }
+      }
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function moveDown(performerId, currentPos) {
+    try {
+      const { data: below } = await supabase
+        .from('performers')
+        .select('id')
+        .eq('queue_position', currentPos + 1)
+
+      if (below && below.length > 0) {
+        // Optimistically update UI
+        setPerformers(prev => prev.map(p => {
+          if (p.id === performerId) return { ...p, queue_position: currentPos + 1 }
+          if (p.id === below[0].id) return { ...p, queue_position: currentPos }
+          return p
+        }).sort((a, b) => a.queue_position - b.queue_position))
+
+        // Update database
+        const { error: err1 } = await supabase
+          .from('performers')
+          .update({ queue_position: currentPos + 1 })
+          .eq('id', performerId)
+
+        const { error: err2 } = await supabase
+          .from('performers')
+          .update({ queue_position: currentPos })
+          .eq('id', below[0].id)
+
+        if (err1 || err2) {
+          setError('Error moving performer')
+          fetchPerformers()
+        }
+      }
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   async function markPerformed(performerId) {
     try {
       await supabase
@@ -311,6 +385,21 @@ export default function Admin() {
                   </div>
                 </div>
                 <div className="queue-actions">
+                  <button
+                    onClick={() => moveUp(p.id, p.queue_position)}
+                    className="btn btn-small"
+                    disabled={idx === 0}
+                    title="Move up in queue"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => moveDown(p.id, p.queue_position)}
+                    className="btn btn-small"
+                    title="Move down in queue"
+                  >
+                    ↓
+                  </button>
                   <button
                     onClick={() => markCurrent(p.id)}
                     className="btn btn-primary btn-small"
