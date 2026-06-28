@@ -76,8 +76,39 @@ body {
 }
 
 html.dark-mode body {
-  background: #1A1A1A !important;
+  background-color: #1A1A1A !important;
   color: var(--text) !important;
+}
+
+html.dark-mode .app,
+html.dark-mode .main-content {
+  background-color: #1A1A1A !important;
+  color: var(--text) !important;
+}
+
+html.dark-mode .navbar {
+  background-color: #2D2D2D !important;
+  border-color: var(--border) !important;
+}
+
+html.dark-mode .performer-card,
+html.dark-mode .on-deck,
+html.dark-mode .queue-list,
+html.dark-mode .auth-form,
+html.dark-mode .signup-form,
+html.dark-mode .admin-table,
+html.dark-mode .queue-progress,
+html.dark-mode .queue-list-admin,
+html.dark-mode .queue-list-completed {
+  background-color: #2D2D2D !important;
+}
+
+html.dark-mode input,
+html.dark-mode textarea,
+html.dark-mode select {
+  background-color: #404040 !important;
+  color: var(--text) !important;
+  border-color: #505050 !important;
 }
 
 /* Navbar */
