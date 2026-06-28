@@ -9,7 +9,8 @@ export default function QueueDisplay() {
   useEffect(() => {
     fetchPerformers()
 
-    const interval = setInterval(fetchPerformers, 30000)
+    // Poll every 10 seconds for live updates
+    const interval = setInterval(fetchPerformers, 10000)
     return () => clearInterval(interval)
   }, [])
 
@@ -30,9 +31,12 @@ export default function QueueDisplay() {
 
   if (loading) return <div className="loading">Loading queue...</div>
 
-  const currentPerformer = performers.find(p => p.current)
-  const nextPerformers = performers.filter(p => !p.current).slice(0, 2)
-  const restPerformers = performers.filter(p => !p.current).slice(2)
+  // Filter out performers who have already performed
+  const activePerformers = performers.filter(p => !p.attended)
+
+  const currentPerformer = activePerformers.find(p => p.current)
+  const nextPerformers = activePerformers.filter(p => !p.current).slice(0, 2)
+  const restPerformers = activePerformers.filter(p => !p.current).slice(2)
 
   return (
     <div className="queue-container">
