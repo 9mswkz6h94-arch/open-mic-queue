@@ -16,99 +16,17 @@
   --font-dyslexic: 'OpenDyslexic', 'Arial', sans-serif;
 }
 
-/* Dark Mode (manual toggle only) */
-html.dark-mode {
-  --primary: #A29BFE;
-  --primary-dark: #9B8FFF;
-  --text: #E8E8E8;
-  --text-muted: #B0B0B0;
-  --bg-subtle: #2D2D2D;
-  --border: #404040;
-}
-
-html.dark-mode body {
-  background: #1A1A1A !important;
-  color: var(--text);
-}
-
-html.dark-mode a {
-  color: var(--primary);
-}
-
-html.dark-mode .btn {
-  color: inherit;
-}
-
-/* High Contrast Mode */
-html.high-contrast {
-  --primary: #0000EE;
-  --primary-dark: #0000BB;
-  --text: #000000;
-  --text-muted: #333333;
-  --bg-subtle: #FFFFFF;
-  --border: #000000;
-  --success: #008000;
-  --error: #FF0000;
-}
-
-html.high-contrast .btn {
-  border: 2px solid currentColor;
-}
-
-/* Dyslexic Font */
-html.dyslexic-font {
-  font-family: var(--font-dyslexic) !important;
-}
-
-html.dyslexic-font * {
-  font-family: var(--font-dyslexic) !important;
-}
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-dyslexic);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text);
   background: #f5f5f5;
-  transition: background-color 0.3s, color 0.3s;
 }
 
-html.dark-mode body {
-  background-color: #1A1A1A !important;
-  color: var(--text) !important;
-}
-
-html.dark-mode .app,
-html.dark-mode .main-content {
-  background-color: #1A1A1A !important;
-  color: var(--text) !important;
-}
-
-html.dark-mode .navbar {
-  background-color: #2D2D2D !important;
-  border-color: var(--border) !important;
-}
-
-html.dark-mode .performer-card,
-html.dark-mode .on-deck,
-html.dark-mode .queue-list,
-html.dark-mode .auth-form,
-html.dark-mode .signup-form,
-html.dark-mode .admin-table,
-html.dark-mode .queue-progress,
-html.dark-mode .queue-list-admin,
-html.dark-mode .queue-list-completed {
-  background-color: #2D2D2D !important;
-}
-
-html.dark-mode input,
-html.dark-mode textarea,
-html.dark-mode select {
-  background-color: #404040 !important;
-  color: var(--text) !important;
-  border-color: #505050 !important;
+* {
+  font-family: var(--font-dyslexic);
 }
 
 /* Navbar */

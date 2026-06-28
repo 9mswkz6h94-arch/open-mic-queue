@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabaseClient'
-import AccessibilityMenu from './AccessibilityMenu'
 
 const ADMIN_EMAIL = 'crystal@rainbowheart.studio'
 
@@ -18,7 +17,6 @@ export default function Navbar({ user, onPageChange }) {
           🎤 Open Mic Queue
         </h1>
         <div className="navbar-actions">
-          <AccessibilityMenu />
           {user ? (
             <>
               <button onClick={() => onPageChange('home')} className="btn btn-nav">
