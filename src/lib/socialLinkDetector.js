@@ -8,6 +8,10 @@ export function detectSocialPlatform(url) {
   if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) return 'youtube'
   if (urlLower.includes('facebook.com') || urlLower.includes('fb.com')) return 'facebook'
   if (urlLower.includes('spotify.com')) return 'spotify'
+  if (urlLower.includes('bandcamp.com')) return 'bandcamp'
+  if (urlLower.includes('soundcloud.com')) return 'soundcloud'
+  if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) return 'twitter'
+  if (urlLower.includes('linkedin.com')) return 'linkedin'
 
   return 'website'
 }
@@ -17,8 +21,12 @@ export function getPlatformIcon(platform) {
     instagram: '📸',
     tiktok: '🎵',
     youtube: '🔴',
-    facebook: 'f️',
+    facebook: '👥',
     spotify: '🎧',
+    bandcamp: '🎸',
+    soundcloud: '☁️',
+    twitter: '𝕏',
+    linkedin: '💼',
     website: '🔗',
   }
   return icons[platform] || '🔗'
@@ -33,9 +41,9 @@ export function parseSocialLinks(urlString) {
   urls.forEach(url => {
     const platform = detectSocialPlatform(url)
     if (platform) {
-      // Ensure website URLs have https:// protocol
+      // Ensure all URLs have https:// protocol if missing
       let finalUrl = url
-      if (platform === 'website' && !url.startsWith('http')) {
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
         finalUrl = 'https://' + url
       }
       links[platform] = finalUrl

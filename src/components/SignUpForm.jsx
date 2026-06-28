@@ -10,7 +10,6 @@ export default function SignUpForm({ onSuccess }) {
   const [formData, setFormData] = useState({
     stageName: '',
     realName: '',
-    email: '',
     song1: '',
     song2: '',
     socialLinks: '',
@@ -62,7 +61,6 @@ export default function SignUpForm({ onSuccess }) {
       setFormData({
         stageName: '',
         realName: '',
-        email: '',
         song1: '',
         song2: '',
         socialLinks: '',
@@ -107,18 +105,6 @@ export default function SignUpForm({ onSuccess }) {
           onChange={handleChange}
           required
           placeholder="Your full name"
-        />
-      </div>
-
-      <div className="form-group">
-        <label>Email *</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          placeholder="your@email.com"
         />
       </div>
 
