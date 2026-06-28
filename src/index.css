@@ -17,27 +17,30 @@
 }
 
 /* Dark Mode (manual toggle only) */
-body.dark-mode {
+html.dark-mode {
   --primary: #A29BFE;
   --primary-dark: #9B8FFF;
   --text: #E8E8E8;
   --text-muted: #B0B0B0;
   --bg-subtle: #2D2D2D;
   --border: #404040;
+}
+
+html.dark-mode body {
   background: #1A1A1A !important;
   color: var(--text);
 }
 
-body.dark-mode a {
+html.dark-mode a {
   color: var(--primary);
 }
 
-body.dark-mode .btn {
+html.dark-mode .btn {
   color: inherit;
 }
 
 /* High Contrast Mode */
-body.high-contrast {
+html.high-contrast {
   --primary: #0000EE;
   --primary-dark: #0000BB;
   --text: #000000;
@@ -48,16 +51,16 @@ body.high-contrast {
   --error: #FF0000;
 }
 
-body.high-contrast .btn {
+html.high-contrast .btn {
   border: 2px solid currentColor;
 }
 
 /* Dyslexic Font */
-body.dyslexic-font {
+html.dyslexic-font {
   font-family: var(--font-dyslexic) !important;
 }
 
-body.dyslexic-font * {
+html.dyslexic-font * {
   font-family: var(--font-dyslexic) !important;
 }
 

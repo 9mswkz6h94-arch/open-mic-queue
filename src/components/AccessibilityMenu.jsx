@@ -21,10 +21,10 @@ export default function AccessibilityMenu() {
   }, [])
 
   function applySettings(settings) {
-    const body = document.body
-    body.classList.toggle('dark-mode', settings.darkMode)
-    body.classList.toggle('high-contrast', settings.highContrast)
-    body.classList.toggle('dyslexic-font', settings.dyslexicFont)
+    const html = document.documentElement
+    html.classList.toggle('dark-mode', settings.darkMode)
+    html.classList.toggle('high-contrast', settings.highContrast)
+    html.classList.toggle('dyslexic-font', settings.dyslexicFont)
   }
 
   function toggleDarkMode() {

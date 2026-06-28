@@ -37,7 +37,7 @@
   z-index: 1000;
 }
 
-body.dark-mode .a11y-panel {
+html.dark-mode .a11y-panel {
   background: #2D2D2D;
   border-color: var(--border);
 }
@@ -101,18 +101,18 @@ body.dark-mode .a11y-panel {
 }
 
 /* High Contrast mode adjustments */
-body.high-contrast .a11y-panel {
+html.high-contrast .a11y-panel {
   border: 3px solid var(--text);
 }
 
-body.high-contrast .a11y-option {
+html.high-contrast .a11y-option {
   border: 2px solid transparent;
 }
 
-body.high-contrast .a11y-option:hover {
+html.high-contrast .a11y-option:hover {
   border: 2px solid var(--text);
 }
 
-body.high-contrast .a11y-toggle-btn {
+html.high-contrast .a11y-toggle-btn {
   border: 2px solid var(--text);
 }
