@@ -1,0 +1,118 @@
+.accessibility-menu {
+  position: relative;
+}
+
+.a11y-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  color: var(--text);
+}
+
+.a11y-toggle-btn:hover {
+  background: var(--bg-subtle);
+  transform: scale(1.1);
+}
+
+.a11y-toggle-btn:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.a11y-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 240px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+body.dark-mode .a11y-panel {
+  background: #2D2D2D;
+  border-color: var(--border);
+}
+
+.a11y-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+.a11y-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.a11y-option:hover {
+  background: var(--bg-subtle);
+}
+
+.a11y-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.a11y-option span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.a11y-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px 8px;
+}
+
+.a11y-close:hover {
+  color: var(--text);
+}
+
+.a11y-close:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* High Contrast mode adjustments */
+body.high-contrast .a11y-panel {
+  border: 3px solid var(--text);
+}
+
+body.high-contrast .a11y-option {
+  border: 2px solid transparent;
+}
+
+body.high-contrast .a11y-option:hover {
+  border: 2px solid var(--text);
+}
+
+body.high-contrast .a11y-toggle-btn {
+  border: 2px solid var(--text);
+}

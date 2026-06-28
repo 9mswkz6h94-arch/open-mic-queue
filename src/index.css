@@ -13,6 +13,65 @@
   --border: #E9ECEF;
   --success: #00B894;
   --error: #D63031;
+  --font-dyslexic: 'OpenDyslexic', 'Arial', sans-serif;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #A29BFE;
+    --primary-dark: #9B8FFF;
+    --text: #E8E8E8;
+    --text-muted: #B0B0B0;
+    --bg-subtle: #2D2D2D;
+    --border: #404040;
+  }
+
+  body {
+    background: #1A1A1A;
+    color: var(--text);
+  }
+}
+
+/* Dark mode toggle class (for manual toggle) */
+body.dark-mode {
+  --primary: #A29BFE;
+  --primary-dark: #9B8FFF;
+  --text: #E8E8E8;
+  --text-muted: #B0B0B0;
+  --bg-subtle: #2D2D2D;
+  --border: #404040;
+  background: #1A1A1A;
+  color: var(--text);
+}
+
+body.dark-mode a {
+  color: var(--primary);
+}
+
+/* High Contrast Mode */
+body.high-contrast {
+  --primary: #0000EE;
+  --primary-dark: #0000BB;
+  --text: #000000;
+  --text-muted: #333333;
+  --bg-subtle: #FFFFFF;
+  --border: #000000;
+  --success: #008000;
+  --error: #FF0000;
+}
+
+body.high-contrast .btn {
+  border: 2px solid currentColor;
+}
+
+/* Dyslexic Font */
+body.dyslexic-font {
+  font-family: var(--font-dyslexic);
+}
+
+body.dyslexic-font * {
+  font-family: var(--font-dyslexic);
 }
 
 body {
