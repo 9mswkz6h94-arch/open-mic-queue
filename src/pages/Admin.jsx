@@ -115,6 +115,106 @@ export default function Admin() {
     }
   }
 
+  async function resetTestData() {
+    if (!window.confirm('Reset all performers and recreate test data? This cannot be undone.')) {
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      // Delete all performers
+      await supabase.from('performers').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+      // Recreate test data
+      const testPerformers = [
+        {
+          stage_name: 'Neon Dreams',
+          real_name: 'Alex Chen',
+          email: 'alex.test@example.com',
+          song_1_title: 'Midnight Echo',
+          song_2_title: 'Electric Soul',
+          social_links: { instagram: 'https://instagram.com/neondreams', spotify: 'https://spotify.com/artist/neondreams' },
+          queue_position: 1,
+          current: false,
+          attended: false,
+          original_confirmed: true,
+          livestream_confirmed: true,
+          radio_featured_confirmed: true,
+          email_opt_in: true,
+        },
+        {
+          stage_name: 'Velvet Voice',
+          real_name: 'Maya Rodriguez',
+          email: 'maya.test@example.com',
+          song_1_title: 'Whispered Truths',
+          song_2_title: 'Dancing Through Rain',
+          social_links: { tiktok: 'https://tiktok.com/@velvetvoice', youtube: 'https://youtube.com/@velvetvoice' },
+          queue_position: 2,
+          current: false,
+          attended: false,
+          original_confirmed: true,
+          livestream_confirmed: true,
+          radio_featured_confirmed: true,
+          email_opt_in: false,
+        },
+        {
+          stage_name: 'Echo Box',
+          real_name: 'Jordan Smith',
+          email: 'jordan.test@example.com',
+          song_1_title: 'Reverb Rising',
+          song_2_title: 'Sound Wave Surfer',
+          social_links: { bandcamp: 'https://echobox.bandcamp.com', website: 'https://echoboxmusic.com' },
+          queue_position: 3,
+          current: false,
+          attended: false,
+          original_confirmed: true,
+          livestream_confirmed: true,
+          radio_featured_confirmed: true,
+          email_opt_in: true,
+        },
+        {
+          stage_name: 'Luna Tides',
+          real_name: 'Sam Wilson',
+          email: 'sam.test@example.com',
+          song_1_title: 'Ocean Blue Dreams',
+          song_2_title: 'Moonlight Path',
+          social_links: { instagram: 'https://instagram.com/lunatides' },
+          queue_position: 4,
+          current: false,
+          attended: false,
+          original_confirmed: true,
+          livestream_confirmed: true,
+          radio_featured_confirmed: true,
+          email_opt_in: false,
+        },
+        {
+          stage_name: 'Sonic Rebellion',
+          real_name: 'Casey Parker',
+          email: 'casey.test@example.com',
+          song_1_title: 'Break the Silence',
+          song_2_title: 'Rebel Heart Anthem',
+          social_links: { soundcloud: 'https://soundcloud.com/sonicrebellion' },
+          queue_position: 5,
+          current: false,
+          attended: false,
+          original_confirmed: true,
+          livestream_confirmed: true,
+          radio_featured_confirmed: true,
+          email_opt_in: true,
+        },
+      ]
+
+      await supabase.from('performers').insert(testPerformers)
+
+      fetchPerformers()
+      setError('')
+    } catch (err) {
+      setError('Error resetting test data: ' + err.message)
+      setLoading(false)
+    }
+  }
+
   if (loading) return <div className="loading">Loading queue...</div>
 
   const currentPerformer = performers.find(p => p.current)
@@ -123,7 +223,16 @@ export default function Admin() {
 
   return (
     <div className="admin-page">
-      <h2>🎤 Live Queue Manager</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h2>🎤 Live Queue Manager</h2>
+        <button
+          onClick={resetTestData}
+          className="btn btn-secondary btn-small"
+          title="Reset all performers and recreate test data"
+        >
+          🔄 Reset Test Data
+        </button>
+      </div>
 
       {error && <div className="error-message">{error}</div>}
 
