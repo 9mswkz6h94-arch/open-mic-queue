@@ -22,6 +22,9 @@ export default function Navbar({ user, onPageChange }) {
               <button onClick={() => onPageChange('home')} className="btn btn-nav">
                 Queue
               </button>
+              <button onClick={() => onPageChange('edit-entry')} className="btn btn-nav">
+                ✏️ Edit My Entry
+              </button>
               {isAdmin && (
                 <button onClick={() => onPageChange('admin')} className="btn btn-nav">
                   🎛️ Manage

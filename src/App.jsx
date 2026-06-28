@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import SignUp from './pages/SignUp'
+import EditEntry from './pages/EditEntry'
 import Admin from './pages/Admin'
 import AdminLogin from './pages/AdminLogin'
 import './App.css'
@@ -21,6 +22,7 @@ function AppContent() {
       <main className="main-content">
         {currentPage === 'home' && <Home user={user} onSignUpClick={() => setCurrentPage('signup')} />}
         {currentPage === 'signup' && <SignUp onSignUpComplete={() => setCurrentPage('home')} />}
+        {currentPage === 'edit-entry' && <EditEntry onComplete={() => setCurrentPage('home')} />}
         {currentPage === 'admin-login' && (
           <AdminLogin
             onLoginSuccess={() => setCurrentPage('admin')}
