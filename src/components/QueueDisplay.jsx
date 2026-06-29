@@ -31,8 +31,9 @@ export default function QueueDisplay() {
 
   if (loading) return <div className="loading">Loading queue...</div>
 
-  // Filter out performers who have already performed
+  // Split performers into active and completed
   const activePerformers = performers.filter(p => !p.attended)
+  const completedPerformers = performers.filter(p => p.attended)
 
   const currentPerformer = activePerformers.find(p => p.current)
   const nextPerformers = activePerformers.filter(p => !p.current).slice(0, 2)
@@ -50,6 +51,12 @@ export default function QueueDisplay() {
               <p><strong>1.</strong> {currentPerformer.song_1_title}</p>
               <p><strong>2.</strong> {currentPerformer.song_2_title}</p>
             </div>
+            {currentPerformer.performer_notes && (
+              <div className="performer-story">
+                <p className="story-label">🎵 About This Artist</p>
+                <p className="story-text">{currentPerformer.performer_notes}</p>
+              </div>
+            )}
             <div className="social-links">
               {currentPerformer.social_links && Object.entries(currentPerformer.social_links).map(([platform, url]) => (
                 <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
@@ -83,6 +90,34 @@ export default function QueueDisplay() {
               <div key={p.id} className="queue-row">
                 <span className="position">#{nextPerformers.length + idx + 1}</span>
                 <span className="name">{p.stage_name}</span>
+                <div className="social-links">
+                  {p.social_links && Object.entries(p.social_links).map(([platform, url]) => (
+                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
+                      {getPlatformIcon(platform)}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {completedPerformers.length > 0 && (
+        <div className="already-performed">
+          <h2>✓ Already Performed ({completedPerformers.length})</h2>
+          <div className="completed-list">
+            {completedPerformers.map((p) => (
+              <div key={p.id} className="completed-performer">
+                <div className="completed-header">
+                  <span className="check-mark">✓</span>
+                  <span className="artist-name">{p.stage_name}</span>
+                </div>
+                {p.performer_notes && (
+                  <div className="artist-story">
+                    <p>{p.performer_notes}</p>
+                  </div>
+                )}
                 <div className="social-links">
                   {p.social_links && Object.entries(p.social_links).map(([platform, url]) => (
                     <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
