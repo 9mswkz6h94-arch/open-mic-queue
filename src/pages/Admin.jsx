@@ -88,74 +88,62 @@ export default function Admin() {
     }
   }
 
-  async function moveUp(performerId, currentPos) {
-    if (currentPos <= 1) return
+  async function moveUp(performerId, idx) {
+    if (idx <= 0) return
 
     try {
-      const { data: above } = await supabase
+      const upcomingPerformers = performers.filter(p => !p.attended && !p.current)
+      const performerToMove = upcomingPerformers[idx]
+      const performerAbove = upcomingPerformers[idx - 1]
+
+      if (!performerAbove) return
+
+      // Swap positions
+      const { error: err1 } = await supabase
         .from('performers')
-        .select('id')
-        .eq('queue_position', currentPos - 1)
+        .update({ queue_position: performerAbove.queue_position })
+        .eq('id', performerId)
 
-      if (above && above.length > 0) {
-        // Optimistically update UI
-        setPerformers(prev => prev.map(p => {
-          if (p.id === performerId) return { ...p, queue_position: currentPos - 1 }
-          if (p.id === above[0].id) return { ...p, queue_position: currentPos }
-          return p
-        }).sort((a, b) => a.queue_position - b.queue_position))
+      const { error: err2 } = await supabase
+        .from('performers')
+        .update({ queue_position: performerToMove.queue_position })
+        .eq('id', performerAbove.id)
 
-        // Update database
-        const { error: err1 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos - 1 })
-          .eq('id', performerId)
-
-        const { error: err2 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos })
-          .eq('id', above[0].id)
-
-        if (err1 || err2) {
-          setError('Error moving performer')
-          fetchPerformers()
-        }
+      if (err1 || err2) {
+        setError('Error moving performer')
+      } else {
+        fetchPerformers()
       }
     } catch (err) {
       setError(err.message)
     }
   }
 
-  async function moveDown(performerId, currentPos) {
+  async function moveDown(performerId, idx) {
     try {
-      const { data: below } = await supabase
+      const upcomingPerformers = performers.filter(p => !p.attended && !p.current)
+      if (idx >= upcomingPerformers.length - 1) return
+
+      const performerToMove = upcomingPerformers[idx]
+      const performerBelow = upcomingPerformers[idx + 1]
+
+      if (!performerBelow) return
+
+      // Swap positions
+      const { error: err1 } = await supabase
         .from('performers')
-        .select('id')
-        .eq('queue_position', currentPos + 1)
+        .update({ queue_position: performerBelow.queue_position })
+        .eq('id', performerId)
 
-      if (below && below.length > 0) {
-        // Optimistically update UI
-        setPerformers(prev => prev.map(p => {
-          if (p.id === performerId) return { ...p, queue_position: currentPos + 1 }
-          if (p.id === below[0].id) return { ...p, queue_position: currentPos }
-          return p
-        }).sort((a, b) => a.queue_position - b.queue_position))
+      const { error: err2 } = await supabase
+        .from('performers')
+        .update({ queue_position: performerToMove.queue_position })
+        .eq('id', performerBelow.id)
 
-        // Update database
-        const { error: err1 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos + 1 })
-          .eq('id', performerId)
-
-        const { error: err2 } = await supabase
-          .from('performers')
-          .update({ queue_position: currentPos })
-          .eq('id', below[0].id)
-
-        if (err1 || err2) {
-          setError('Error moving performer')
-          fetchPerformers()
-        }
+      if (err1 || err2) {
+        setError('Error moving performer')
+      } else {
+        fetchPerformers()
       }
     } catch (err) {
       setError(err.message)
@@ -389,7 +377,7 @@ export default function Admin() {
                 </div>
                 <div className="queue-actions">
                   <button
-                    onClick={() => moveUp(p.id, p.queue_position)}
+                    onClick={() => moveUp(p.id, idx)}
                     className="btn btn-small"
                     disabled={idx === 0}
                     title="Move up in queue"
@@ -397,7 +385,7 @@ export default function Admin() {
                     ↑
                   </button>
                   <button
-                    onClick={() => moveDown(p.id, p.queue_position)}
+                    onClick={() => moveDown(p.id, idx)}
                     className="btn btn-small"
                     title="Move down in queue"
                   >
