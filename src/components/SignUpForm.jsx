@@ -44,7 +44,7 @@ export default function SignUpForm({ onSuccess }) {
         .insert({
           stage_name: formData.stageName,
           real_name: formData.realName,
-          email: formData.email,
+          email: user.email,
           auth_user_id: user.id,
           song_1_title: formData.song1,
           song_2_title: formData.song2,

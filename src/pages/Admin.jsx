@@ -44,13 +44,16 @@ export default function Admin() {
 
   async function markCurrent(performerId) {
     try {
-      // Unmark all
-      await supabase
-        .from('performers')
-        .update({ current: false })
-        .neq('id', performerId)
+      // Find current performer and mark as attended
+      const currentPerformer = performers.find(p => p.current)
+      if (currentPerformer) {
+        await supabase
+          .from('performers')
+          .update({ current: false, attended: true })
+          .eq('id', currentPerformer.id)
+      }
 
-      // Mark this one
+      // Mark new one as current
       await supabase
         .from('performers')
         .update({ current: true })
