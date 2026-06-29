@@ -317,6 +317,20 @@ export default function Admin() {
           <div className="current-section">
             <div className="status-label">NOW PERFORMING</div>
             <div className="performer-card current-large">
+              {currentPerformer.profile_picture_url && (
+                <img
+                  src={currentPerformer.profile_picture_url}
+                  alt={currentPerformer.stage_name}
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '8px',
+                    objectFit: 'cover',
+                    marginBottom: '16px',
+                    border: '3px solid rgba(255, 255, 255, 0.2)',
+                  }}
+                />
+              )}
               <h3>{currentPerformer.stage_name}</h3>
               <p className="real-name">{currentPerformer.real_name}</p>
               <div className="songs-list">

@@ -256,6 +256,39 @@ body {
   padding: 24px;
 }
 
+.performer-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.performer-avatar.current-avatar {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
+.performer-avatar.on-deck-avatar {
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.performer-avatar.completed-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
 .performer-card h3 {
   font-size: 28px;
   margin-bottom: 4px;
@@ -512,6 +545,9 @@ body {
   border-radius: 6px;
   border-left: 3px solid var(--success);
   opacity: 0.85;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .completed-header {

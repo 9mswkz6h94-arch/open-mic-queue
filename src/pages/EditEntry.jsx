@@ -8,6 +8,7 @@ export default function EditEntry({ onComplete }) {
   const [entry, setEntry] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -18,6 +19,7 @@ export default function EditEntry({ onComplete }) {
     song2: '',
     socialLinks: '',
     notes: '',
+    profilePictureUrl: '',
   })
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export default function EditEntry({ onComplete }) {
         song2: data.song_2_title || '',
         socialLinks: Object.values(data.social_links || {}).join('\n'),
         notes: data.performer_notes || '',
+        profilePictureUrl: data.profile_picture_url || '',
       })
       setLoading(false)
     } catch (err) {
@@ -62,6 +65,45 @@ export default function EditEntry({ onComplete }) {
       ...prev,
       [name]: value,
     }))
+  }
+
+  async function handlePictureUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+
+    try {
+      setUploading(true)
+      setError('')
+
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+      const filePath = `profile-pictures/${fileName}`
+
+      // Upload file
+      const { error: uploadError } = await supabase.storage
+        .from('performers')
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('performers')
+        .getPublicUrl(filePath)
+
+      if (data?.publicUrl) {
+        setFormData(prev => ({
+          ...prev,
+          profilePictureUrl: data.publicUrl,
+        }))
+        setSuccess('✓ Picture uploaded!')
+      }
+    } catch (err) {
+      setError(`Upload failed: ${err.message}`)
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function handleSave() {
@@ -83,6 +125,7 @@ export default function EditEntry({ onComplete }) {
           song_2_title: formData.song2,
           social_links: parsedSocialLinks,
           performer_notes: formData.notes,
+          profile_picture_url: formData.profilePictureUrl || null,
         })
         .eq('id', entry.id)
 
@@ -176,6 +219,34 @@ export default function EditEntry({ onComplete }) {
             rows="4"
           />
           <small>Leave blank if you don't have social links</small>
+        </div>
+
+        <div className="form-group">
+          <label>Profile Picture (optional)</label>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePictureUpload}
+                disabled={uploading}
+              />
+              <small>PNG, JPG, or GIF (max 5MB)</small>
+            </div>
+            {formData.profilePictureUrl && (
+              <img
+                src={formData.profilePictureUrl}
+                alt="Profile"
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '8px',
+                  objectFit: 'cover',
+                  flexShrink: 0,
+                }}
+              />
+            )}
+          </div>
         </div>
 
         <div className="form-group">

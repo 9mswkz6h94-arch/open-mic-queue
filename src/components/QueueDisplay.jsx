@@ -45,6 +45,13 @@ export default function QueueDisplay() {
         <div className="current-performer">
           <h2>🎤 Currently Performing</h2>
           <div className="performer-card current">
+            {currentPerformer.profile_picture_url && (
+              <img
+                src={currentPerformer.profile_picture_url}
+                alt={currentPerformer.stage_name}
+                className="performer-avatar current-avatar"
+              />
+            )}
             <h3>{currentPerformer.stage_name}</h3>
             <p className="real-name">{currentPerformer.real_name}</p>
             <div className="songs">
@@ -74,6 +81,13 @@ export default function QueueDisplay() {
           <div className="on-deck-list">
             {nextPerformers.map((p, idx) => (
               <div key={p.id} className="on-deck-card">
+                {p.profile_picture_url && (
+                  <img
+                    src={p.profile_picture_url}
+                    alt={p.stage_name}
+                    className="performer-avatar on-deck-avatar"
+                  />
+                )}
                 <div className="on-deck-header">
                   <span className="position-badge">#{idx + 1}</span>
                   <h4>{p.stage_name}</h4>
@@ -130,21 +144,30 @@ export default function QueueDisplay() {
           <div className="completed-list">
             {completedPerformers.map((p) => (
               <div key={p.id} className="completed-performer">
-                <div className="completed-header">
-                  <span className="check-mark">✓</span>
-                  <span className="artist-name">{p.stage_name}</span>
-                </div>
-                {p.performer_notes && (
-                  <div className="artist-story">
-                    <p>{p.performer_notes}</p>
-                  </div>
+                {p.profile_picture_url && (
+                  <img
+                    src={p.profile_picture_url}
+                    alt={p.stage_name}
+                    className="performer-avatar completed-avatar"
+                  />
                 )}
-                <div className="social-links">
-                  {p.social_links && Object.entries(p.social_links).map(([platform, url]) => (
-                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
-                      {getPlatformIcon(platform)}
-                    </a>
-                  ))}
+                <div style={{ flex: 1 }}>
+                  <div className="completed-header">
+                    <span className="check-mark">✓</span>
+                    <span className="artist-name">{p.stage_name}</span>
+                  </div>
+                  {p.performer_notes && (
+                    <div className="artist-story">
+                      <p>{p.performer_notes}</p>
+                    </div>
+                  )}
+                  <div className="social-links">
+                    {p.social_links && Object.entries(p.social_links).map(([platform, url]) => (
+                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
+                        {getPlatformIcon(platform)}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
