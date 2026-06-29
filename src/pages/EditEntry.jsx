@@ -116,18 +116,28 @@ export default function EditEntry({ onComplete }) {
 
       const parsedSocialLinks = parseSocialLinks(formData.socialLinks)
 
-      const { error: err } = await supabase
+      console.log('Saving with picture URL:', formData.profilePictureUrl)
+
+      const updateData = {
+        stage_name: formData.stageName,
+        real_name: formData.realName,
+        song_1_title: formData.song1,
+        song_2_title: formData.song2,
+        social_links: parsedSocialLinks,
+        performer_notes: formData.notes,
+      }
+
+      if (formData.profilePictureUrl) {
+        updateData.profile_picture_url = formData.profilePictureUrl
+      }
+
+      const { error: err, data } = await supabase
         .from('performers')
-        .update({
-          stage_name: formData.stageName,
-          real_name: formData.realName,
-          song_1_title: formData.song1,
-          song_2_title: formData.song2,
-          social_links: parsedSocialLinks,
-          performer_notes: formData.notes,
-          profile_picture_url: formData.profilePictureUrl || null,
-        })
+        .update(updateData)
         .eq('id', entry.id)
+        .select()
+
+      console.log('Update result:', { err, data })
 
       if (err) throw err
 
@@ -136,6 +146,7 @@ export default function EditEntry({ onComplete }) {
         onComplete()
       }, 1500)
     } catch (err) {
+      console.error('Save error:', err)
       setError(err.message)
       setSaving(false)
     }
