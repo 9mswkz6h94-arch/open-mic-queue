@@ -994,6 +994,27 @@ body {
   margin-left: auto;
 }
 
+.drag-handle {
+  font-size: 20px;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 4px 8px;
+  border-radius: 4px;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.timestamp-display {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
 @media (max-width: 768px) {
   .queue-item {
     flex-direction: column;

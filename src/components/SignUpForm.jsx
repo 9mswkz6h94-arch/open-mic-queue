@@ -39,6 +39,13 @@ export default function SignUpForm({ onSuccess }) {
 
       const parsedSocialLinks = parseSocialLinks(formData.socialLinks)
 
+      const { data: maxData } = await supabase
+        .from('performers')
+        .select('queue_position')
+        .order('queue_position', { ascending: false })
+        .limit(1)
+      const nextPosition = (maxData?.[0]?.queue_position ?? 0) + 1
+
       const { error: insertError } = await supabase
         .from('performers')
         .insert({
@@ -53,7 +60,7 @@ export default function SignUpForm({ onSuccess }) {
           livestream_confirmed: formData.livestream,
           radio_featured_confirmed: formData.radioFeatured,
           email_opt_in: formData.emailOptIn,
-          queue_position: 9999,
+          queue_position: nextPosition,
         })
 
       if (insertError) throw insertError
