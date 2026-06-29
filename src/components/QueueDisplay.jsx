@@ -70,12 +70,33 @@ export default function QueueDisplay() {
 
       {nextPerformers.length > 0 && (
         <div className="on-deck">
-          <h2>⏭️ On Deck</h2>
+          <h2>⏭️ On Deck (Coming Up Next)</h2>
           <div className="on-deck-list">
             {nextPerformers.map((p, idx) => (
-              <div key={p.id} className="queue-row">
-                <span className="position">#{idx + 1}</span>
-                <span className="name">{p.stage_name}</span>
+              <div key={p.id} className="on-deck-card">
+                <div className="on-deck-header">
+                  <span className="position-badge">#{idx + 1}</span>
+                  <h4>{p.stage_name}</h4>
+                </div>
+                <p className="real-name">{p.real_name}</p>
+                <div className="on-deck-songs">
+                  <p><strong>1.</strong> {p.song_1_title}</p>
+                  <p><strong>2.</strong> {p.song_2_title}</p>
+                </div>
+                {p.performer_notes && (
+                  <div className="on-deck-story">
+                    <p className="story-preview">{p.performer_notes}</p>
+                  </div>
+                )}
+                {p.social_links && Object.keys(p.social_links).length > 0 && (
+                  <div className="social-links">
+                    {Object.entries(p.social_links).map(([platform, url]) => (
+                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
+                        {getPlatformIcon(platform)}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
