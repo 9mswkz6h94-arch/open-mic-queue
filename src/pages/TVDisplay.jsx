@@ -4,7 +4,7 @@ import { supabase } from '@dataClient'
 import './TVDisplay.css'
 
 const PHONE_QUEUE_URL = import.meta.env.VITE_PHONE_QUEUE_URL || 'https://open-mic-queue.netlify.app/'
-const EVENT_NAME = import.meta.env.VITE_EVENT_NAME || 'Open Mic Night'
+const EVENT_NAME = import.meta.env.VITE_EVENT_NAME || 'Brother Jons Song Writer Open Mic'
 const VENUE_NAME = import.meta.env.VITE_VENUE_NAME || 'Presented by Rainbow Heart Studio'
 const SUPPORT_LINKS = [
   { label: 'Cash App', handle: '$rainbowheartstudio', url: 'https://cash.app/$rainbowheartstudio' },
