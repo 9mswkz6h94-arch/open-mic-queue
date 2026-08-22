@@ -93,11 +93,19 @@ export default function EditEntry({ onComplete }) {
         .getPublicUrl(filePath)
 
       if (data?.publicUrl) {
+        const { error: saveError } = await supabase
+          .from('performers')
+          .update({ profile_picture_url: data.publicUrl })
+          .eq('id', entry.id)
+
+        if (saveError) throw saveError
+
         setFormData(prev => ({
           ...prev,
           profilePictureUrl: data.publicUrl,
         }))
-        setSuccess('Picture uploaded.')
+        setEntry(prev => ({ ...prev, profile_picture_url: data.publicUrl }))
+        setSuccess('Picture uploaded and saved.')
       }
     } catch (err) {
       setError(`Upload failed: ${err.message}`)
