@@ -21,7 +21,7 @@ import { CSS } from '@dnd-kit/utilities'
 
 import { isAdminEmail } from '../lib/admin'
 
-function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete }) {
+function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete, onEdit }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: performer.id,
   })
@@ -56,6 +56,9 @@ function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete 
         )}
       </div>
       <div className="queue-actions">
+        <button onClick={() => onEdit(performer.id)} className="btn btn-outline btn-small">
+          Edit
+        </button>
         <button onClick={() => onMarkCurrent(performer.id)} className="btn btn-primary btn-small">
           Start
         </button>
@@ -70,11 +73,12 @@ function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete 
   )
 }
 
-export default function Admin() {
+export default function Admin({ onEditPerformer }) {
   const { user } = useAuth()
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [stageUndo, setStageUndo] = useState(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -82,22 +86,12 @@ export default function Admin() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
-  if (!isAdminEmail(user?.email)) {
-    return (
-      <div className="admin-page">
-        <div className="error-message" style={{ padding: '24px', margin: '24px' }}>
-          <h3>Access Denied</h3>
-          <p>This account is not authorized to use the host console.</p>
-        </div>
-      </div>
-    )
-  }
-
   useEffect(() => {
+    if (!isAdminEmail(user?.email)) return undefined
     fetchPerformers()
     const interval = setInterval(fetchPerformers, 3000)
     return () => clearInterval(interval)
-  }, [])
+  }, [user?.email])
 
   async function fetchPerformers() {
     const { data, error: err } = await supabase
@@ -116,20 +110,30 @@ export default function Admin() {
 
   async function markCurrent(performerId) {
     try {
+      setError('')
       const currentPerformer = performers.find(p => p.current)
-      if (currentPerformer) {
-        await supabase
+      const nextPerformer = performers.find(p => p.id === performerId)
+      const snapshots = [currentPerformer, nextPerformer]
+        .filter(Boolean)
+        .filter((performer, index, list) => list.findIndex(item => item.id === performer.id) === index)
+        .map(stageSnapshot)
+
+      if (currentPerformer && currentPerformer.id !== performerId) {
+        const { error: clearError } = await supabase
           .from('performers')
-          .update({ current: false, completed_at: new Date().toISOString() })
+          .update({ current: false })
           .eq('id', currentPerformer.id)
+        if (clearError) throw clearError
       }
 
-      await supabase
+      const { error: startError } = await supabase
         .from('performers')
-        .update({ current: true, started_at: new Date().toISOString() })
+        .update({ current: true, attended: false, started_at: new Date().toISOString(), completed_at: null })
         .eq('id', performerId)
+      if (startError) throw startError
 
-      fetchPerformers()
+      setStageUndo({ label: `starting ${nextPerformer?.stage_name || 'performer'}`, snapshots })
+      await fetchPerformers()
     } catch (err) {
       setError(err.message)
     }
@@ -137,22 +141,62 @@ export default function Admin() {
 
   async function skipPerformer(performerId) {
     try {
-      await supabase
+      setError('')
+      const nextPerformer = performers.find(p => !p.attended && !p.current && p.id !== performerId)
+      const snapshots = [performers.find(p => p.id === performerId), nextPerformer]
+        .filter(Boolean)
+        .map(stageSnapshot)
+
+      const { error: completeError } = await supabase
         .from('performers')
         .update({ attended: true, current: false, completed_at: new Date().toISOString() })
         .eq('id', performerId)
+      if (completeError) throw completeError
 
-      const nextPerformer = performers.find(p => !p.attended && p.id !== performerId)
       if (nextPerformer) {
-        await supabase
+        const { error: nextError } = await supabase
           .from('performers')
-          .update({ current: true, started_at: new Date().toISOString() })
+          .update({ current: true, attended: false, started_at: new Date().toISOString(), completed_at: null })
           .eq('id', nextPerformer.id)
+        if (nextError) throw nextError
       }
 
-      fetchPerformers()
+      setStageUndo({ label: `advancing past ${snapshots[0]?.stage_name || 'performer'}`, snapshots })
+      await fetchPerformers()
     } catch (err) {
       setError(err.message)
+    }
+  }
+
+  function stageSnapshot(performer) {
+    return {
+      id: performer.id,
+      stage_name: performer.stage_name,
+      current: performer.current,
+      attended: performer.attended,
+      started_at: performer.started_at,
+      completed_at: performer.completed_at,
+    }
+  }
+
+  async function undoLastStageChange() {
+    if (!stageUndo) return
+
+    try {
+      setError('')
+      for (const snapshot of stageUndo.snapshots) {
+        const { id, stage_name: _stageName, ...restoredState } = snapshot
+        const { error: restoreError } = await supabase
+          .from('performers')
+          .update(restoredState)
+          .eq('id', id)
+        if (restoreError) throw restoreError
+      }
+
+      setStageUndo(null)
+      await fetchPerformers()
+    } catch (err) {
+      setError(`Could not undo the stage change: ${err.message}`)
     }
   }
 
@@ -311,6 +355,17 @@ export default function Admin() {
     }
   }
 
+  if (!isAdminEmail(user?.email)) {
+    return (
+      <div className="admin-page">
+        <div className="error-message" style={{ padding: '24px', margin: '24px' }}>
+          <h3>Access Denied</h3>
+          <p>This account is not authorized to use the host console.</p>
+        </div>
+      </div>
+    )
+  }
+
   if (loading) return <div className="loading">Loading queue...</div>
 
   const currentPerformer = performers.find(p => p.current)
@@ -322,6 +377,11 @@ export default function Admin() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div><p className="eyebrow">Event operations</p><h2>Host Console</h2></div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {stageUndo && (
+            <button onClick={undoLastStageChange} className="btn btn-outline btn-small">
+              Back: undo {stageUndo.label}
+            </button>
+          )}
           <button onClick={exportTimestamps} className="btn btn-secondary btn-small">
             Export timestamps
           </button>
@@ -355,6 +415,9 @@ export default function Admin() {
                 <p><strong>2.</strong> {currentPerformer.song_2_title}</p>
               </div>
               <div className="button-group">
+                <button onClick={() => onEditPerformer(currentPerformer.id)} className="btn btn-outline btn-small">
+                  Edit performer
+                </button>
                 <button onClick={() => skipPerformer(currentPerformer.id)} className="btn btn-primary">
                   Mark Performed → Next
                 </button>
@@ -398,6 +461,7 @@ export default function Admin() {
                     onMarkCurrent={markCurrent}
                     onMarkPerformed={markPerformed}
                     onDelete={deletePerformer}
+                    onEdit={onEditPerformer}
                   />
                 ))}
               </div>
@@ -416,6 +480,9 @@ export default function Admin() {
                 <span className="check-mark">Done</span>
                 <span className="performer-name">{p.stage_name}</span>
                 <span className="real-name-small">{p.real_name}</span>
+                <button onClick={() => onEditPerformer(p.id)} className="btn btn-outline btn-small">
+                  Edit
+                </button>
                 {p.started_at && (
                   <span className="timestamp-display" style={{ marginLeft: 'auto', fontSize: '12px' }}>
                     {new Date(p.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

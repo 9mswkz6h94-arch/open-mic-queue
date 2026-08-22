@@ -20,10 +20,11 @@ export default function Navbar({ user, currentPage, onPageChange }) {
         .from('performers')
         .select('stage_name')
         .eq('auth_user_id', user.id)
-        .single()
+        .order('queue_position', { ascending: true })
+        .limit(1)
 
-      if (data?.stage_name) {
-        setStageName(data.stage_name)
+      if (data?.[0]?.stage_name) {
+        setStageName(data[0].stage_name)
       }
     } catch (err) {
       // No performer entry yet
@@ -50,7 +51,7 @@ export default function Navbar({ user, currentPage, onPageChange }) {
                 Queue
               </button>
               <button onClick={() => onPageChange('edit-entry')} className="btn btn-nav" aria-current={currentPage === 'edit-entry' ? 'page' : undefined}>
-                My Entry
+                My Entries
               </button>
               <button onClick={() => onPageChange('signup')} className="btn btn-nav" aria-current={currentPage === 'signup' ? 'page' : undefined}>
                 New Signup

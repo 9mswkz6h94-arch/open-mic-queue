@@ -3,8 +3,9 @@ import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
 
-export default function EditEntry({ onComplete }) {
+export default function EditEntry({ onComplete, entryId = null, adminMode = false }) {
   const { user } = useAuth()
+  const [entries, setEntries] = useState([])
   const [entry, setEntry] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -23,39 +24,54 @@ export default function EditEntry({ onComplete }) {
   })
 
   useEffect(() => {
-    fetchEntry()
-  }, [user])
+    fetchEntries()
+  }, [user, entryId])
 
-  async function fetchEntry() {
+  function loadEntry(data) {
+    setEntry(data)
+    setFormData({
+      stageName: data.stage_name || '',
+      realName: data.real_name || '',
+      song1: data.song_1_title || '',
+      song2: data.song_2_title || '',
+      socialLinks: Object.values(data.social_links || {}).join('\n'),
+      notes: data.performer_notes || '',
+      profilePictureUrl: data.profile_picture_url || '',
+    })
+  }
+
+  async function fetchEntries() {
     if (!user) return
 
     try {
-      const { data, error: err } = await supabase
-        .from('performers')
-        .select('*')
-        .eq('auth_user_id', user.id)
-        .single()
+      let query = supabase.from('performers').select('*')
+      query = entryId
+        ? query.eq('id', entryId)
+        : query.eq('auth_user_id', user.id).order('queue_position', { ascending: true })
 
-      if (err) {
+      const { data, error: err } = await query
+
+      if (err || !data?.length) {
         setError('You haven\'t signed up to perform yet. Sign up first!')
         setLoading(false)
         return
       }
 
-      setEntry(data)
-      setFormData({
-        stageName: data.stage_name || '',
-        realName: data.real_name || '',
-        song1: data.song_1_title || '',
-        song2: data.song_2_title || '',
-        socialLinks: Object.values(data.social_links || {}).join('\n'),
-        notes: data.performer_notes || '',
-        profilePictureUrl: data.profile_picture_url || '',
-      })
+      setEntries(data)
+      loadEntry(data[0])
       setLoading(false)
     } catch (err) {
       setError(err.message)
       setLoading(false)
+    }
+  }
+
+  function handleEntrySelection(event) {
+    const selected = entries.find(item => item.id === event.target.value)
+    if (selected) {
+      setError('')
+      setSuccess('')
+      loadEntry(selected)
     }
   }
 
@@ -149,7 +165,7 @@ export default function EditEntry({ onComplete }) {
 
       if (err) throw err
 
-      setSuccess('Entry updated.')
+      setSuccess(adminMode ? 'Performer entry updated.' : 'Entry updated.')
       setTimeout(() => {
         onComplete()
       }, 1500)
@@ -180,7 +196,21 @@ export default function EditEntry({ onComplete }) {
     <div className="signup-page">
       <div className="auth-form">
         <p className="eyebrow">Performer record / 01</p>
-        <h2>Edit Your Entry</h2>
+        <h2>{adminMode ? 'Edit Performer' : 'Edit Your Entries'}</h2>
+
+        {!adminMode && entries.length > 1 && (
+          <div className="form-group">
+            <label htmlFor="edit-entry-selector">Choose an entry</label>
+            <select id="edit-entry-selector" value={entry.id} onChange={handleEntrySelection}>
+              {entries.map(item => (
+                <option key={item.id} value={item.id}>
+                  #{item.queue_position} — {item.stage_name}
+                </option>
+              ))}
+            </select>
+            <small>You can switch entries here without leaving the editor.</small>
+          </div>
+        )}
 
         {error && <div className="error-message">{error}</div>}
         {success && <div className="success-message">{success}</div>}

@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { supabase } from '@dataClient'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
 import { useAuth } from '../context/AuthContext'
+import { isAdminEmail } from '../lib/admin'
 
 export default function SignUpForm({ onSuccess }) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [entryOwner, setEntryOwner] = useState('self')
+  const [guestEmail, setGuestEmail] = useState('')
   const [formData, setFormData] = useState({
     stageName: '',
     realName: '',
@@ -51,8 +54,9 @@ export default function SignUpForm({ onSuccess }) {
         .insert({
           stage_name: formData.stageName,
           real_name: formData.realName,
-          email: user.email,
-          auth_user_id: user.id,
+          email: entryOwner === 'guest' ? guestEmail : user.email,
+          auth_user_id: entryOwner === 'guest' ? null : user.id,
+          created_by: user.id,
           song_1_title: formData.song1,
           song_2_title: formData.song2,
           social_links: parsedSocialLinks,
@@ -77,6 +81,7 @@ export default function SignUpForm({ onSuccess }) {
         promotionalUse: false,
         emailOptIn: false,
       })
+      setGuestEmail('')
 
       onSuccess()
     } catch (err) {
@@ -92,6 +97,35 @@ export default function SignUpForm({ onSuccess }) {
       <h2>Sign Up to Perform</h2>
 
       {error && <div className="error-message">{error}</div>}
+
+      {isAdminEmail(user?.email) && (
+        <div className="form-group">
+          <label htmlFor="signup-entry-owner">Who is this signup for?</label>
+          <select
+            id="signup-entry-owner"
+            value={entryOwner}
+            onChange={(event) => setEntryOwner(event.target.value)}
+          >
+            <option value="self">My own performer entry</option>
+            <option value="guest">A guest I am adding as host</option>
+          </select>
+          <small>Guest entries stay separate from your personal entries and remain editable in the Host Console.</small>
+        </div>
+      )}
+
+      {entryOwner === 'guest' && (
+        <div className="form-group">
+          <label htmlFor="signup-guest-email">Guest Email *</label>
+          <input
+            id="signup-guest-email"
+            type="email"
+            value={guestEmail}
+            onChange={(event) => setGuestEmail(event.target.value)}
+            required
+            placeholder="performer@example.com"
+          />
+        </div>
+      )}
 
       <div className="form-group">
         <label htmlFor="signup-stage-name">Preferred Stage Name *</label>
