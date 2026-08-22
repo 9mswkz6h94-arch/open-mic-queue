@@ -7,4 +7,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
+export const dataMode = 'production'
+export const isMockMode = false
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)

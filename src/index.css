@@ -13,12 +13,12 @@
   --border: #E9ECEF;
   --success: #00B894;
   --error: #D63031;
-  --font-dyslexic: 'OpenDyslexic', 'Arial', sans-serif;
+  --font-interface: "IBM Plex Sans", Arial, Helvetica, sans-serif;
 }
 
 
 body {
-  font-family: var(--font-dyslexic);
+  font-family: var(--font-interface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text);
@@ -26,7 +26,7 @@ body {
 }
 
 * {
-  font-family: var(--font-dyslexic);
+  font-family: var(--font-interface);
 }
 
 /* Navbar */
@@ -48,7 +48,7 @@ body {
 
 .navbar-title {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .navbar-actions {
@@ -422,7 +422,7 @@ body {
 .on-deck-card h4 {
   margin: 0;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .on-deck-card .real-name {
@@ -516,7 +516,7 @@ body {
 
 .queue-row .name {
   flex: 1;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .already-performed {
@@ -829,7 +829,7 @@ body {
 
 .status-label {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--success);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -900,7 +900,7 @@ body {
 }
 
 .queue-position {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 18px;
   color: var(--primary);
   min-width: 40px;
@@ -976,7 +976,7 @@ body {
 }
 
 .check-mark {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--success);
   font-size: 18px;
   min-width: 24px;
@@ -984,7 +984,7 @@ body {
 }
 
 .performer-name {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
 }
 
@@ -1010,7 +1010,7 @@ body {
 }
 
 .timestamp-display {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 4px;
 }

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@dataClient'
 
-const ADMIN_EMAIL = 'crystal@rainbowheart.studio'
+import { isAdminEmail } from '../lib/admin'
 
-export default function Navbar({ user, onPageChange }) {
-  const isAdmin = user && user.email === ADMIN_EMAIL
+export default function Navbar({ user, currentPage, onPageChange }) {
+  const isAdmin = isAdminEmail(user?.email)
   const [stageName, setStageName] = useState('')
 
   useEffect(() => {
@@ -39,27 +39,28 @@ export default function Navbar({ user, onPageChange }) {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <h1 className="navbar-title" style={{ cursor: 'pointer' }} onClick={() => onPageChange('home')}>
-          🎤 Open Mic Queue
-        </h1>
+        <button type="button" className="navbar-home" onClick={() => onPageChange('home')}>
+          <span className="navbar-title">Open Mic Queue</span>
+          <span className="navbar-context">Live running order</span>
+        </button>
         <div className="navbar-actions">
           {user ? (
             <>
-              <button onClick={() => onPageChange('home')} className="btn btn-nav">
+              <button onClick={() => onPageChange('home')} className="btn btn-nav" aria-current={currentPage === 'home' ? 'page' : undefined}>
                 Queue
               </button>
-              <button onClick={() => onPageChange('edit-entry')} className="btn btn-nav">
-                ✏️ Edit My Entry
+              <button onClick={() => onPageChange('edit-entry')} className="btn btn-nav" aria-current={currentPage === 'edit-entry' ? 'page' : undefined}>
+                My Entry
               </button>
-              <button onClick={() => onPageChange('signup')} className="btn btn-nav">
-                ➕ Sign Up Another
+              <button onClick={() => onPageChange('signup')} className="btn btn-nav" aria-current={currentPage === 'signup' ? 'page' : undefined}>
+                New Signup
               </button>
               {isAdmin && (
-                <button onClick={() => onPageChange('admin')} className="btn btn-nav">
-                  🎛️ Manage
+                <button onClick={() => onPageChange('admin')} className="btn btn-nav" aria-current={currentPage === 'admin' ? 'page' : undefined}>
+                  Host Console
                 </button>
               )}
-              <span className="user-email">{stageName || user.email}</span>
+              <span className="user-email" title={stageName || user.email}>Signed in / {stageName || user.email}</span>
               <button onClick={handleLogout} className="btn btn-logout">
                 Logout
               </button>
@@ -70,7 +71,7 @@ export default function Navbar({ user, onPageChange }) {
                 Sign Up to Perform
               </button>
               <button onClick={() => onPageChange('admin-login')} className="btn btn-nav">
-                🎛️ Admin
+                Host Login
               </button>
             </>
           )}

@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
-
-const ADMIN_EMAIL = 'crystal@rainbowheart.studio'
+import { isAdminEmail } from '../lib/admin'
 
 export default function AdminLogin({ onLoginSuccess, onCancel }) {
   const { user } = useAuth()
@@ -12,7 +11,7 @@ export default function AdminLogin({ onLoginSuccess, onCancel }) {
   const [error, setError] = useState('')
 
   // If already logged in as admin, show dashboard
-  if (user && user.email === ADMIN_EMAIL) {
+  if (isAdminEmail(user?.email)) {
     onLoginSuccess()
     return null
   }
@@ -24,7 +23,7 @@ export default function AdminLogin({ onLoginSuccess, onCancel }) {
 
     try {
       // Check if email is admin
-      if (email !== ADMIN_EMAIL) {
+      if (!isAdminEmail(email)) {
         throw new Error('Admin access denied. Please use the correct admin email.')
       }
 
@@ -47,27 +46,30 @@ export default function AdminLogin({ onLoginSuccess, onCancel }) {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
-        <h2>🎛️ Queue Manager Login</h2>
+        <p className="eyebrow">Restricted access</p>
+        <h2>Host Console</h2>
         <p className="subtitle">Host controls only</p>
 
         {error && <div className="error-message">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Admin Email</label>
+            <label htmlFor="admin-email">Admin Email</label>
             <input
+              id="admin-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="crystal@rainbowheart.stuio"
+              placeholder="admin@rainbowheart.studio"
               autoFocus
             />
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="admin-password">Password</label>
             <input
+              id="admin-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

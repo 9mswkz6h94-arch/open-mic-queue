@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
 
@@ -97,7 +97,7 @@ export default function EditEntry({ onComplete }) {
           ...prev,
           profilePictureUrl: data.publicUrl,
         }))
-        setSuccess('✓ Picture uploaded!')
+        setSuccess('Picture uploaded.')
       }
     } catch (err) {
       setError(`Upload failed: ${err.message}`)
@@ -141,7 +141,7 @@ export default function EditEntry({ onComplete }) {
 
       if (err) throw err
 
-      setSuccess('✓ Entry updated!')
+      setSuccess('Entry updated.')
       setTimeout(() => {
         onComplete()
       }, 1500)
@@ -171,14 +171,16 @@ export default function EditEntry({ onComplete }) {
   return (
     <div className="signup-page">
       <div className="auth-form">
+        <p className="eyebrow">Performer record / 01</p>
         <h2>Edit Your Entry</h2>
 
         {error && <div className="error-message">{error}</div>}
-        {success && <div style={{ background: '#C3FAD6', color: '#27AE60', padding: '12px', borderRadius: '6px', marginBottom: '16px' }}>{success}</div>}
+        {success && <div className="success-message">{success}</div>}
 
         <div className="form-group">
-          <label>Stage Name *</label>
+          <label htmlFor="edit-stage-name">Stage Name *</label>
           <input
+            id="edit-stage-name"
             type="text"
             name="stageName"
             value={formData.stageName}
@@ -188,8 +190,9 @@ export default function EditEntry({ onComplete }) {
         </div>
 
         <div className="form-group">
-          <label>Real Name *</label>
+          <label htmlFor="edit-real-name">Real Name *</label>
           <input
+            id="edit-real-name"
             type="text"
             name="realName"
             value={formData.realName}
@@ -199,8 +202,9 @@ export default function EditEntry({ onComplete }) {
         </div>
 
         <div className="form-group">
-          <label>Song 1 Title *</label>
+          <label htmlFor="edit-song-1">Song 1 Title *</label>
           <input
+            id="edit-song-1"
             type="text"
             name="song1"
             value={formData.song1}
@@ -210,8 +214,9 @@ export default function EditEntry({ onComplete }) {
         </div>
 
         <div className="form-group">
-          <label>Song 2 Title *</label>
+          <label htmlFor="edit-song-2">Song 2 Title *</label>
           <input
+            id="edit-song-2"
             type="text"
             name="song2"
             value={formData.song2}
@@ -221,8 +226,9 @@ export default function EditEntry({ onComplete }) {
         </div>
 
         <div className="form-group">
-          <label>Social Links (paste URLs, one per line)</label>
+          <label htmlFor="edit-social-links">Social Links (paste URLs, one per line)</label>
           <textarea
+            id="edit-social-links"
             name="socialLinks"
             value={formData.socialLinks}
             onChange={handleChange}
@@ -233,10 +239,11 @@ export default function EditEntry({ onComplete }) {
         </div>
 
         <div className="form-group">
-          <label>Profile Picture (optional)</label>
+          <label htmlFor="edit-profile-picture">Profile Picture (optional)</label>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
             <div style={{ flex: 1 }}>
               <input
+                id="edit-profile-picture"
                 type="file"
                 accept="image/*"
                 onChange={handlePictureUpload}
@@ -261,8 +268,9 @@ export default function EditEntry({ onComplete }) {
         </div>
 
         <div className="form-group">
-          <label>Performer Notes (optional)</label>
+          <label htmlFor="edit-performer-notes">Performer Notes (optional)</label>
           <textarea
+            id="edit-performer-notes"
             name="notes"
             value={formData.notes}
             onChange={handleChange}

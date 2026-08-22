@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@dataClient'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
 import { useAuth } from '../context/AuthContext'
 
@@ -15,7 +15,7 @@ export default function SignUpForm({ onSuccess }) {
     socialLinks: '',
     original: false,
     livestream: false,
-    radioFeatured: false,
+    promotionalUse: false,
     emailOptIn: false,
   })
 
@@ -33,7 +33,7 @@ export default function SignUpForm({ onSuccess }) {
     setLoading(true)
 
     try {
-      if (!formData.original || !formData.livestream || !formData.radioFeatured) {
+      if (!formData.original || !formData.livestream || !formData.promotionalUse) {
         throw new Error('You must accept all terms to continue')
       }
 
@@ -58,7 +58,8 @@ export default function SignUpForm({ onSuccess }) {
           social_links: parsedSocialLinks,
           original_confirmed: formData.original,
           livestream_confirmed: formData.livestream,
-          radio_featured_confirmed: formData.radioFeatured,
+          // Legacy database column retained until a safe schema migration renames it.
+          radio_featured_confirmed: formData.promotionalUse,
           email_opt_in: formData.emailOptIn,
           queue_position: nextPosition,
         })
@@ -73,7 +74,7 @@ export default function SignUpForm({ onSuccess }) {
         socialLinks: '',
         original: false,
         livestream: false,
-        radioFeatured: false,
+        promotionalUse: false,
         emailOptIn: false,
       })
 
@@ -87,13 +88,15 @@ export default function SignUpForm({ onSuccess }) {
 
   return (
     <form onSubmit={handleSubmit} className="signup-form">
+      <p className="eyebrow">Performer registration / 01</p>
       <h2>Sign Up to Perform</h2>
 
       {error && <div className="error-message">{error}</div>}
 
       <div className="form-group">
-        <label>Preferred Stage Name *</label>
+        <label htmlFor="signup-stage-name">Preferred Stage Name *</label>
         <input
+          id="signup-stage-name"
           type="text"
           name="stageName"
           value={formData.stageName}
@@ -104,8 +107,9 @@ export default function SignUpForm({ onSuccess }) {
       </div>
 
       <div className="form-group">
-        <label>Real Name *</label>
+        <label htmlFor="signup-real-name">Real Name *</label>
         <input
+          id="signup-real-name"
           type="text"
           name="realName"
           value={formData.realName}
@@ -116,8 +120,9 @@ export default function SignUpForm({ onSuccess }) {
       </div>
 
       <div className="form-group">
-        <label>Song 1 Title *</label>
+        <label htmlFor="signup-song-1">Song 1 Title *</label>
         <input
+          id="signup-song-1"
           type="text"
           name="song1"
           value={formData.song1}
@@ -128,8 +133,9 @@ export default function SignUpForm({ onSuccess }) {
       </div>
 
       <div className="form-group">
-        <label>Song 2 Title *</label>
+        <label htmlFor="signup-song-2">Song 2 Title *</label>
         <input
+          id="signup-song-2"
           type="text"
           name="song2"
           value={formData.song2}
@@ -140,8 +146,9 @@ export default function SignUpForm({ onSuccess }) {
       </div>
 
       <div className="form-group">
-        <label>Social Links (paste URLs, one per line)</label>
+        <label htmlFor="signup-social-links">Social Links (paste URLs, one per line)</label>
         <textarea
+          id="signup-social-links"
           name="socialLinks"
           value={formData.socialLinks}
           onChange={handleChange}
@@ -160,7 +167,7 @@ export default function SignUpForm({ onSuccess }) {
             onChange={handleChange}
             required
           />
-          ✓ I confirm this is an original song
+          I confirm this is an original song
         </label>
 
         <label>
@@ -171,18 +178,18 @@ export default function SignUpForm({ onSuccess }) {
             onChange={handleChange}
             required
           />
-          ✓ I consent to this being live streamed on YouTube/Facebook
+          I consent to this being live streamed on YouTube/Facebook
         </label>
 
         <label>
           <input
             type="checkbox"
-            name="radioFeatured"
-            checked={formData.radioFeatured}
+            name="promotionalUse"
+            checked={formData.promotionalUse}
             onChange={handleChange}
             required
           />
-          ✓ I consent to this potentially being featured on our radio show
+          I consent to clips or recordings being used in Open Mic social media, event promotion, or promotional material for future shows
         </label>
 
         <label>
@@ -192,7 +199,7 @@ export default function SignUpForm({ onSuccess }) {
             checked={formData.emailOptIn}
             onChange={handleChange}
           />
-          ✓ I'd like to receive email reminders about upcoming open mics
+          I'd like to receive email reminders about upcoming open mics
         </label>
       </div>
 

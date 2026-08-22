@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { getPlatformIcon } from '../lib/socialLinkDetector'
+import { supabase } from '@dataClient'
 
 export default function QueueDisplay() {
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetchPerformers()
@@ -15,6 +15,7 @@ export default function QueueDisplay() {
   }, [])
 
   async function fetchPerformers() {
+    setError('')
     const { data, error } = await supabase
       .from('performers')
       .select('*')
@@ -22,6 +23,8 @@ export default function QueueDisplay() {
 
     if (error) {
       console.error('Error fetching performers:', error)
+      setError(error.message || 'The queue could not be loaded.')
+      setLoading(false)
     } else {
       console.log('Fetched performers:', data)
       setPerformers(data || [])
@@ -30,6 +33,27 @@ export default function QueueDisplay() {
   }
 
   if (loading) return <div className="loading">Loading queue...</div>
+
+  if (error) {
+    return (
+      <div className="queue-state error-message" role="alert">
+        <h2>Queue unavailable</h2>
+        <p>{error}</p>
+        <button type="button" className="btn btn-primary" onClick={() => { setLoading(true); fetchPerformers() }}>
+          Try again
+        </button>
+      </div>
+    )
+  }
+
+  if (performers.length === 0) {
+    return (
+      <div className="queue-state" role="status">
+        <h2>The queue is open</h2>
+        <p>No performers have signed up yet.</p>
+      </div>
+    )
+  }
 
   // Split performers into active and completed
   const activePerformers = performers.filter(p => !p.attended)
@@ -43,7 +67,7 @@ export default function QueueDisplay() {
     <div className="queue-container">
       {currentPerformer && (
         <div className="current-performer">
-          <h2>🎤 Currently Performing</h2>
+          <h2><span className="section-index">01</span> Currently performing</h2>
           <div className="performer-card current">
             {currentPerformer.profile_picture_url && (
               <img
@@ -60,14 +84,14 @@ export default function QueueDisplay() {
             </div>
             {currentPerformer.performer_notes && (
               <div className="performer-story">
-                <p className="story-label">🎵 About This Artist</p>
+                <p className="story-label">Artist note</p>
                 <p className="story-text">{currentPerformer.performer_notes}</p>
               </div>
             )}
             <div className="social-links">
               {currentPerformer.social_links && Object.entries(currentPerformer.social_links).map(([platform, url]) => (
-                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
-                  {getPlatformIcon(platform)}
+                <a key={platform} href={url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${platform} profile`}>
+                  Visit {platform}
                 </a>
               ))}
             </div>
@@ -77,7 +101,7 @@ export default function QueueDisplay() {
 
       {nextPerformers.length > 0 && (
         <div className="on-deck">
-          <h2>⏭️ On Deck (Coming Up Next)</h2>
+          <h2><span className="section-index">02</span> On deck</h2>
           <div className="on-deck-list">
             {nextPerformers.map((p, idx) => (
               <div key={p.id} className="on-deck-card">
@@ -89,7 +113,7 @@ export default function QueueDisplay() {
                   />
                 )}
                 <div className="on-deck-header">
-                  <span className="position-badge">#{idx + 1}</span>
+                  <span className="position-badge" aria-label={`On deck position ${idx + 1}`}>{String(idx + 1).padStart(2, '0')}</span>
                   <h4>{p.stage_name}</h4>
                 </div>
                 <p className="real-name">{p.real_name}</p>
@@ -105,8 +129,8 @@ export default function QueueDisplay() {
                 {p.social_links && Object.keys(p.social_links).length > 0 && (
                   <div className="social-links">
                     {Object.entries(p.social_links).map(([platform, url]) => (
-                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
-                        {getPlatformIcon(platform)}
+                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${platform} profile`}>
+                        Visit {platform}
                       </a>
                     ))}
                   </div>
@@ -117,30 +141,34 @@ export default function QueueDisplay() {
         </div>
       )}
 
-      {restPerformers.length > 0 && (
-        <div className="queue-list">
-          <h2>📋 Queue ({restPerformers.length})</h2>
+      <div className="queue-list">
+        <h2><span className="section-index">03</span> Queue <span className="section-count">{String(restPerformers.length).padStart(2, '0')}</span></h2>
+        {restPerformers.length > 0 ? (
           <div className="performers-table">
             {restPerformers.map((p, idx) => (
               <div key={p.id} className="queue-row">
-                <span className="position">#{nextPerformers.length + idx + 1}</span>
+                <span className="position" aria-label={`Queue position ${nextPerformers.length + idx + 1}`}>
+                  {String(nextPerformers.length + idx + 1).padStart(2, '0')}
+                </span>
                 <span className="name">{p.stage_name}</span>
                 <div className="social-links">
                   {p.social_links && Object.entries(p.social_links).map(([platform, url]) => (
-                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
-                      {getPlatformIcon(platform)}
+                    <a key={platform} href={url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${platform} profile`}>
+                      Visit {platform}
                     </a>
                   ))}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="queue-section-empty" role="status">No additional performers are waiting beyond On Deck.</p>
+        )}
+      </div>
 
       {completedPerformers.length > 0 && (
         <div className="already-performed">
-          <h2>✓ Already Performed ({completedPerformers.length})</h2>
+          <h2><span className="section-index">04</span> Performed <span className="section-count">{String(completedPerformers.length).padStart(2, '0')}</span></h2>
           <div className="completed-list">
             {completedPerformers.map((p) => (
               <div key={p.id} className="completed-performer">
@@ -151,9 +179,9 @@ export default function QueueDisplay() {
                     className="performer-avatar completed-avatar"
                   />
                 )}
-                <div style={{ flex: 1 }}>
+                <div className="completed-body">
                   <div className="completed-header">
-                    <span className="check-mark">✓</span>
+                    <span className="check-mark">Performed</span>
                     <span className="artist-name">{p.stage_name}</span>
                   </div>
                   {p.performer_notes && (
@@ -163,8 +191,8 @@ export default function QueueDisplay() {
                   )}
                   <div className="social-links">
                     {p.social_links && Object.entries(p.social_links).map(([platform, url]) => (
-                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" title={platform}>
-                        {getPlatformIcon(platform)}
+                      <a key={platform} href={url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${platform} profile`}>
+                        Visit {platform}
                       </a>
                     ))}
                   </div>

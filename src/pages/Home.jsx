@@ -7,8 +7,9 @@ export default function Home({ onSignUpClick }) {
   return (
     <div className="home-page">
       <div className="hero">
-        <h1>🎤 Open Mic Live Queue</h1>
-        <p>Check your position in real-time • Follow performers • Discover new artists</p>
+        <p className="eyebrow">Live event</p>
+        <h1>Open Mic Queue</h1>
+        <p>Current performer, running order, and artist information.</p>
         {!user && (
           <button onClick={onSignUpClick} className="btn btn-primary btn-large">
             Sign Up to Perform

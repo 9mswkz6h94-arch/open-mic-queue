@@ -1,0 +1,44 @@
+{
+  "$schema": "../rainbowheart-os/schemas/app-profile.schema.json",
+  "schemaVersion": 1,
+  "designSystemVersion": "0.1.3",
+  "app": "open-mic-queue",
+  "projectId": "proj-002",
+  "foundation": "scaffold",
+  "targetIdentity": "prism",
+  "currentPhase": "scaffold-review",
+  "surfaces": {
+    "publicQueue": "scaffold",
+    "performerSignup": "scaffold",
+    "hostConsole": "scaffold",
+    "futureVenueIdentity": "prism"
+  },
+  "reviewSafety": {
+    "dataMode": "mock-isolated",
+    "interactiveMutationAllowed": true,
+    "productionBannerRequired": false,
+    "resetStrategy": "Select or reselect a named fixture in the local review banner",
+    "notes": "Local development defaults to the mock adapter and does not instantiate Supabase. Production-connected static review requires the explicit ?dataMode=production switch and displays a warning."
+  },
+  "requiredChecks": [
+    "phone",
+    "tabletPortrait",
+    "tabletLandscape",
+    "desktop",
+    "keyboard",
+    "textZoom200",
+    "reducedMotion",
+    "loadingEmptyErrorStates"
+  ],
+  "prohibited": [
+    "horizontalPageScroll",
+    "emojiOnlyControls",
+    "productionSecrets",
+    "themeChangesToAuthorization",
+    "productionDataMutationDuringDesignReview",
+    "prismStylingBeforeScaffoldApproval"
+  ],
+  "handoff": "DESIGN_HANDOFF.md",
+  "scaffoldStylesheet": "src/themes/scaffold.css",
+  "nextAction": "Verify reduced-motion behavior and complete the Scaffold review on the physical event tablet"
+}

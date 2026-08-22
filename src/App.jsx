@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
+import EnvironmentBanner from '@environmentBanner'
 import Home from './pages/Home'
 import SignUp from './pages/SignUp'
 import EditEntry from './pages/EditEntry'
@@ -18,7 +19,8 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Navbar user={user} onPageChange={setCurrentPage} />
+      <EnvironmentBanner />
+      <Navbar user={user} currentPage={currentPage} onPageChange={setCurrentPage} />
       <main className="main-content">
         {currentPage === 'home' && <Home user={user} onSignUpClick={() => setCurrentPage('signup')} />}
         {currentPage === 'signup' && <SignUp onSignUpComplete={() => setCurrentPage('home')} />}

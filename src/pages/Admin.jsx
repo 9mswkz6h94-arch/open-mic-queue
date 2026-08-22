@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import {
   DndContext,
@@ -19,7 +19,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-const ADMIN_EMAIL = 'crystal@rainbowheart.studio'
+import { isAdminEmail } from '../lib/admin'
 
 function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -34,8 +34,8 @@ function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete 
 
   return (
     <div ref={setNodeRef} style={style} className="queue-item">
-      <div {...attributes} {...listeners} className="drag-handle" title="Drag to reorder">
-        ⠿
+      <div {...attributes} {...listeners} className="drag-handle" title="Drag to reorder" aria-label={`Reorder ${performer.stage_name}`}>
+        Move
       </div>
       <div className="queue-position">#{idx + 1}</div>
       <div className="queue-info">
@@ -59,11 +59,11 @@ function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete 
         <button onClick={() => onMarkCurrent(performer.id)} className="btn btn-primary btn-small">
           Start
         </button>
-        <button onClick={() => onMarkPerformed(performer.id)} className="btn btn-success btn-small">
-          ✓
+        <button onClick={() => onMarkPerformed(performer.id)} className="btn btn-success btn-small" aria-label={`Mark ${performer.stage_name} performed`}>
+          Done
         </button>
-        <button onClick={() => onDelete(performer.id, performer.stage_name)} className="btn btn-delete btn-small">
-          ✕
+        <button onClick={() => onDelete(performer.id, performer.stage_name)} className="btn btn-delete btn-small" aria-label={`Delete ${performer.stage_name}`}>
+          Delete
         </button>
       </div>
     </div>
@@ -82,12 +82,12 @@ export default function Admin() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
-  if (!user || user.email !== ADMIN_EMAIL) {
+  if (!isAdminEmail(user?.email)) {
     return (
       <div className="admin-page">
         <div className="error-message" style={{ padding: '24px', margin: '24px' }}>
           <h3>Access Denied</h3>
-          <p>Only Crystal can access the queue manager.</p>
+          <p>This account is not authorized to use the host console.</p>
         </div>
       </div>
     )
@@ -107,6 +107,7 @@ export default function Admin() {
 
     if (err) {
       setError(err.message)
+      setLoading(false)
     } else {
       setPerformers(data || [])
       setLoading(false)
@@ -319,13 +320,10 @@ export default function Admin() {
   return (
     <div className="admin-page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-        <h2>🎤 Live Queue Manager</h2>
+        <div><p className="eyebrow">Event operations</p><h2>Host Console</h2></div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={exportTimestamps} className="btn btn-secondary btn-small">
-            📥 Export Timestamps
-          </button>
-          <button onClick={resetTestData} className="btn btn-secondary btn-small" title="Reset all performers and recreate test data">
-            🔄 Reset Test Data
+            Export timestamps
           </button>
         </div>
       </div>
@@ -382,9 +380,9 @@ export default function Admin() {
 
       {/* Drag-and-drop Queue */}
       <div className="queue-list-admin">
-        <h3>📋 Up Next ({upcomingPerformers.length})</h3>
+        <h3>Up next <span className="section-count">{String(upcomingPerformers.length).padStart(2, '0')}</span></h3>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-          Drag ⠿ to reorder
+          Drag the Move handle to reorder.
         </p>
         {upcomingPerformers.length === 0 ? (
           <p className="empty-queue">No more performers in queue</p>
@@ -411,15 +409,15 @@ export default function Admin() {
       {/* Completed */}
       {completedPerformers.length > 0 && (
         <div className="queue-list-completed">
-          <h3>✓ Already Performed ({completedPerformers.length})</h3>
+          <h3>Performed <span className="section-count">{String(completedPerformers.length).padStart(2, '0')}</span></h3>
           <div className="completed-items">
             {completedPerformers.map(p => (
               <div key={p.id} className="completed-item">
-                <span className="check-mark">✓</span>
+                <span className="check-mark">Done</span>
                 <span className="performer-name">{p.stage_name}</span>
                 <span className="real-name-small">{p.real_name}</span>
                 {p.started_at && (
-                  <span className="timestamp-display" style={{ marginLeft: 'auto', fontSize: '11px' }}>
+                  <span className="timestamp-display" style={{ marginLeft: 'auto', fontSize: '12px' }}>
                     {new Date(p.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     {p.completed_at && (
                       <> – {new Date(p.completed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
@@ -437,6 +435,14 @@ export default function Admin() {
         <p>Still to go: {upcomingPerformers.length}</p>
         <p>Performed: {completedPerformers.length}</p>
       </div>
+
+      <details className="development-tools">
+        <summary>Development tools</summary>
+        <p>These controls alter the entire shared queue and are not part of normal event operation.</p>
+        <button onClick={resetTestData} className="btn btn-delete btn-small" title="Reset all performers and recreate test data">
+          Reset all test data
+        </button>
+      </details>
     </div>
   )
 }

@@ -45,7 +45,7 @@ html.dark-mode .a11y-panel {
 .a11y-panel h3 {
   margin: 0 0 16px 0;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text);
@@ -75,7 +75,7 @@ html.dark-mode .a11y-panel {
 
 .a11y-option span {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
 }
 

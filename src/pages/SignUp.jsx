@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import SignUpForm from '../components/SignUpForm'
 
@@ -69,14 +69,16 @@ export default function SignUp({ onSignUpComplete }) {
     return (
       <div className="signup-page">
         <div className="auth-form">
+          <p className="eyebrow">Performer access / 01</p>
           <h2>{isLogin ? 'Log In' : 'Create Your Account'}</h2>
 
           {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleAuthSubmit}>
             <div className="form-group">
-              <label>Email</label>
+              <label htmlFor="signup-auth-email">Email</label>
               <input
+                id="signup-auth-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -86,8 +88,9 @@ export default function SignUp({ onSignUpComplete }) {
             </div>
 
             <div className="form-group">
-              <label>Password</label>
+              <label htmlFor="signup-auth-password">Password</label>
               <input
+                id="signup-auth-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -101,7 +104,7 @@ export default function SignUp({ onSignUpComplete }) {
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px', color: 'var(--text-muted)' }}>
+          <p className="auth-switch">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <button
               type="button"
@@ -111,7 +114,7 @@ export default function SignUp({ onSignUpComplete }) {
                 setEmail('')
                 setPassword('')
               }}
-              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: '600', textDecoration: 'underline' }}
+              className="text-action"
             >
               {isLogin ? 'Create one' : 'Log in'}
             </button>
