@@ -4,10 +4,12 @@ import { supabase } from '@dataClient'
 import './TVDisplay.css'
 
 const PHONE_QUEUE_URL = import.meta.env.VITE_PHONE_QUEUE_URL || 'https://open-mic-queue.netlify.app/'
-const DONATION_URL = import.meta.env.VITE_DONATION_URL || 'https://rainbowheart.studio/'
-const DONATION_LABEL = import.meta.env.VITE_DONATION_LABEL || 'Support Rainbow Heart Studio'
 const EVENT_NAME = import.meta.env.VITE_EVENT_NAME || 'Open Mic Night'
 const VENUE_NAME = import.meta.env.VITE_VENUE_NAME || 'Presented by Rainbow Heart Studio'
+const SUPPORT_LINKS = [
+  { label: 'Cash App', handle: '$rainbowheartstudio', url: 'https://cash.app/$rainbowheartstudio' },
+  { label: 'Venmo', handle: '@rainbowheartstudio', url: 'https://venmo.com/rainbowheartstudio' },
+]
 
 export default function TVDisplay() {
   const [performers, setPerformers] = useState([])
@@ -61,7 +63,17 @@ export default function TVDisplay() {
         <aside className="tv-sidebar">
           <section className="tv-brand-card"><p className="tv-section-label">The studio</p><h2>Rainbow Heart Studio</h2><p>Music, creativity, lessons, and community built with heart.</p></section>
           <section className="tv-qr-card"><div className="tv-qr-copy"><p className="tv-section-label">Explore the full queue</p><h3>Scan with your phone</h3><p>See the running order, song titles, artist stories, music, and performer links.</p></div><QRCodeSVG value={PHONE_QUEUE_URL} size={156} bgColor="#ffffff" fgColor="#0a0a0a" level="M" /></section>
-          <section className="tv-donation-card"><div><p className="tv-section-label">Keep local music growing</p><h3>{DONATION_LABEL}</h3><p>Scan to support studio programs and community music events.</p></div><QRCodeSVG value={DONATION_URL} size={112} bgColor="#ffffff" fgColor="#0a0a0a" level="M" /></section>
+          <section className="tv-donation-card">
+            <div className="tv-donation-heading"><p className="tv-section-label">Keep local music growing</p><h3>Support the studio</h3></div>
+            <div className="tv-donation-options">
+              {SUPPORT_LINKS.map(link => (
+                <div className="tv-donation-option" key={link.label}>
+                  <QRCodeSVG value={link.url} size={104} bgColor="#ffffff" fgColor="#0a0a0a" level="M" />
+                  <div><strong>{link.label}</strong><span>{link.handle}</span></div>
+                </div>
+              ))}
+            </div>
+          </section>
         </aside>
       </main>
 
