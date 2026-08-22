@@ -15,6 +15,7 @@ export default function TVDisplay() {
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement || document.webkitFullscreenElement))
 
   useEffect(() => {
     let active = true
@@ -30,6 +31,34 @@ export default function TVDisplay() {
     return () => { active = false; window.clearInterval(interval) }
   }, [])
 
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement || document.webkitFullscreenElement))
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenState)
+    document.addEventListener('webkitfullscreenchange', syncFullscreenState)
+    return () => {
+      document.removeEventListener('fullscreenchange', syncFullscreenState)
+      document.removeEventListener('webkitfullscreenchange', syncFullscreenState)
+    }
+  }, [])
+
+  async function toggleFullscreen() {
+    try {
+      const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+      if (fullscreenElement) {
+        const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen
+        await exitFullscreen?.call(document)
+      } else {
+        const root = document.documentElement
+        const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen
+        await requestFullscreen?.call(root)
+      }
+    } catch (fullscreenError) {
+      console.error('Fullscreen unavailable:', fullscreenError)
+    }
+  }
+
   const activePerformers = useMemo(() => performers.filter(performer => !performer.attended), [performers])
   const currentPerformer = activePerformers.find(performer => performer.current)
   const upcomingPerformers = activePerformers.filter(performer => !performer.current)
@@ -39,7 +68,13 @@ export default function TVDisplay() {
     <div className="tv-display">
       <header className="tv-header">
         <div><p className="tv-kicker">Rainbow Heart Studio presents</p><h1>{EVENT_NAME}</h1></div>
-        <div className="tv-event-meta"><span>Live tonight</span><strong>{VENUE_NAME}</strong></div>
+        <div className="tv-event-meta">
+          <span>Live tonight</span>
+          <strong>{VENUE_NAME}</strong>
+          <button type="button" className="tv-fullscreen-button" onClick={toggleFullscreen}>
+            {isFullscreen ? 'Exit full screen' : 'Full screen'}
+          </button>
+        </div>
       </header>
 
       <main className="tv-stage">
