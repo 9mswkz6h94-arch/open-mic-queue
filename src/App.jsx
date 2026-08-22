@@ -7,7 +7,10 @@ import SignUp from './pages/SignUp'
 import EditEntry from './pages/EditEntry'
 import Admin from './pages/Admin'
 import AdminLogin from './pages/AdminLogin'
+import TVDisplay from './pages/TVDisplay'
 import './App.css'
+
+const isTVDisplay = new URLSearchParams(window.location.search).get('display') === 'tv'
 
 function AppContent() {
   const { user, loading } = useAuth()
@@ -38,6 +41,8 @@ function AppContent() {
 }
 
 export default function App() {
+  if (isTVDisplay) return <TVDisplay />
+
   return (
     <AuthProvider>
       <AppContent />

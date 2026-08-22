@@ -56,9 +56,10 @@ export default function Navbar({ user, currentPage, onPageChange }) {
                 New Signup
               </button>
               {isAdmin && (
-                <button onClick={() => onPageChange('admin')} className="btn btn-nav" aria-current={currentPage === 'admin' ? 'page' : undefined}>
-                  Host Console
-                </button>
+                <>
+                  <button onClick={() => onPageChange('admin')} className="btn btn-nav" aria-current={currentPage === 'admin' ? 'page' : undefined}>Host Console</button>
+                  <a href="/?display=tv" target="_blank" rel="noopener noreferrer" className="btn btn-nav">TV Display</a>
+                </>
               )}
               <span className="user-email" title={stageName || user.email}>Signed in / {stageName || user.email}</span>
               <button onClick={handleLogout} className="btn btn-logout">
