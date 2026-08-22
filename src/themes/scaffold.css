@@ -1005,6 +1005,13 @@ textarea:focus-visible,
   font-family: var(--scaffold-font-measurement);
   font-size: var(--scaffold-text-micro);
   text-transform: uppercase;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .queue-actions {

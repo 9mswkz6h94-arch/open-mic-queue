@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -79,6 +79,8 @@ export default function Admin({ onEditPerformer }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [stageUndo, setStageUndo] = useState(null)
+  const [isReordering, setIsReordering] = useState(false)
+  const reorderingRef = useRef(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -94,6 +96,7 @@ export default function Admin({ onEditPerformer }) {
   }, [user?.email])
 
   async function fetchPerformers() {
+    if (reorderingRef.current) return
     const { data, error: err } = await supabase
       .from('performers')
       .select('*')
@@ -203,33 +206,60 @@ export default function Admin({ onEditPerformer }) {
 
   async function handleDragEnd(event) {
     const { active, over } = event
-    if (!over || active.id === over.id) return
+    if (!over || active.id === over.id) {
+      finishReordering()
+      return
+    }
 
     const upcomingPerformers = performers.filter(p => !p.attended && !p.current)
     const oldIndex = upcomingPerformers.findIndex(p => p.id === active.id)
     const newIndex = upcomingPerformers.findIndex(p => p.id === over.id)
-    const reordered = arrayMove(upcomingPerformers, oldIndex, newIndex)
+    if (oldIndex < 0 || newIndex < 0) {
+      finishReordering()
+      return
+    }
 
-    // Optimistic UI update
-    setPerformers(prev => {
-      const others = prev.filter(p => p.attended || p.current)
-      return [...others, ...reordered]
-    })
+    try {
+      setError('')
+      const reordered = arrayMove(upcomingPerformers, oldIndex, newIndex)
+      const fixedPerformers = performers.filter(p => p.attended || p.current)
+      const basePosition = Math.max(0, ...fixedPerformers.map(p => p.queue_position || 0)) + 1
+      const positioned = reordered.map((performer, idx) => ({
+        ...performer,
+        queue_position: basePosition + idx,
+      }))
 
-    // Persist new positions — give each a unique sequential value
-    const currentPerformer = performers.find(p => p.current)
-    const basePosition = currentPerformer
-      ? currentPerformer.queue_position + 1
-      : 1
+      // Update immediately so the row stays where the host dropped it.
+      setPerformers([...fixedPerformers, ...positioned].sort((a, b) => a.queue_position - b.queue_position))
 
-    await Promise.all(
-      reordered.map((p, idx) =>
-        supabase
-          .from('performers')
-          .update({ queue_position: basePosition + idx })
-          .eq('id', p.id)
+      const results = await Promise.all(
+        positioned.map(performer =>
+          supabase
+            .from('performers')
+            .update({ queue_position: performer.queue_position })
+            .eq('id', performer.id)
+        )
       )
-    )
+      const saveError = results.find(result => result.error)?.error
+      if (saveError) throw saveError
+
+      finishReordering()
+      await fetchPerformers()
+    } catch (err) {
+      finishReordering()
+      setError(`Could not save the new queue order: ${err.message}`)
+      await fetchPerformers()
+    }
+  }
+
+  function startReordering() {
+    reorderingRef.current = true
+    setIsReordering(true)
+  }
+
+  function finishReordering() {
+    reorderingRef.current = false
+    setIsReordering(false)
   }
 
   async function markPerformed(performerId) {
@@ -489,12 +519,19 @@ export default function Admin({ onEditPerformer }) {
       <div className="queue-list-admin">
         <h3>Up next <span className="section-count">{String(upcomingPerformers.length).padStart(2, '0')}</span></h3>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-          Drag the Move handle to reorder.
+          Drag the Move handle to reorder. On a touchscreen, press and hold the handle, then drag.
+          {isReordering && <strong role="status"> Saving order…</strong>}
         </p>
         {upcomingPerformers.length === 0 ? (
           <p className="empty-queue">No more performers in queue</p>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={startReordering}
+            onDragCancel={finishReordering}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext items={upcomingPerformers.map(p => p.id)} strategy={verticalListSortingStrategy}>
               <div className="queue-items">
                 {upcomingPerformers.map((p, idx) => (
