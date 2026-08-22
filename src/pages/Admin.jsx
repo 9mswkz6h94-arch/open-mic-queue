@@ -174,6 +174,7 @@ export default function Admin({ onEditPerformer }) {
       stage_name: performer.stage_name,
       current: performer.current,
       attended: performer.attended,
+      queue_position: performer.queue_position,
       started_at: performer.started_at,
       completed_at: performer.completed_at,
     }
@@ -240,6 +241,49 @@ export default function Admin({ onEditPerformer }) {
       fetchPerformers()
     } catch (err) {
       setError(err.message)
+    }
+  }
+
+  async function requeuePerformer(performer) {
+    try {
+      setError('')
+      const previousState = stageSnapshot(performer)
+      const nextPosition = Math.max(0, ...performers.map(item => item.queue_position || 0)) + 1
+      const { error: requeueError } = await supabase
+        .from('performers')
+        .update({
+          attended: false,
+          current: false,
+          started_at: null,
+          completed_at: null,
+          queue_position: nextPosition,
+        })
+        .eq('id', performer.id)
+
+      if (requeueError) throw requeueError
+      setStageUndo({ label: `requeueing ${performer.stage_name}`, snapshots: [previousState] })
+      await fetchPerformers()
+    } catch (err) {
+      setError(`Could not requeue ${performer.stage_name}: ${err.message}`)
+    }
+  }
+
+  async function clearPerformedPerformers() {
+    const completedCount = performers.filter(performer => performer.attended).length
+    if (!completedCount) return
+    if (!window.confirm(`Remove all ${completedCount} performed ${completedCount === 1 ? 'person' : 'people'} from the queue?\n\nUse this at the start of a new event week. This permanently removes those entries.`)) return
+
+    try {
+      setError('')
+      const { error: clearError } = await supabase
+        .from('performers')
+        .delete()
+        .eq('attended', true)
+      if (clearError) throw clearError
+      setStageUndo(null)
+      await fetchPerformers()
+    } catch (err) {
+      setError(`Could not clear the performed list: ${err.message}`)
     }
   }
 
@@ -473,7 +517,12 @@ export default function Admin({ onEditPerformer }) {
       {/* Completed */}
       {completedPerformers.length > 0 && (
         <div className="queue-list-completed">
-          <h3>Performed <span className="section-count">{String(completedPerformers.length).padStart(2, '0')}</span></h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+            <h3>Performed <span className="section-count">{String(completedPerformers.length).padStart(2, '0')}</span></h3>
+            <button onClick={clearPerformedPerformers} className="btn btn-delete btn-small">
+              Clear performed for new week
+            </button>
+          </div>
           <div className="completed-items">
             {completedPerformers.map(p => (
               <div key={p.id} className="completed-item">
@@ -482,6 +531,9 @@ export default function Admin({ onEditPerformer }) {
                 <span className="real-name-small">{p.real_name}</span>
                 <button onClick={() => onEditPerformer(p.id)} className="btn btn-outline btn-small">
                   Edit
+                </button>
+                <button onClick={() => requeuePerformer(p)} className="btn btn-primary btn-small">
+                  Requeue
                 </button>
                 {p.started_at && (
                   <span className="timestamp-display" style={{ marginLeft: 'auto', fontSize: '12px' }}>
