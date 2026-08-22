@@ -22,4 +22,49 @@
 .tv-ticker { height:13vh; display:grid; grid-template-columns:auto minmax(0,1fr); border-top:2px solid #fcfcf8; }.tv-ticker-label { display:grid; place-items:center; padding:0 2.5vw; background:#fcfcf8; color:#0a0a0a; font-family:"IBM Plex Mono",monospace; font-size:clamp(1rem,1.5vw,1.7rem); font-weight:600; text-transform:uppercase; }.tv-ticker-window { min-width:0; display:flex; align-items:center; overflow:hidden; }.tv-ticker-track { width:max-content; display:flex; }.tv-ticker-track.is-scrolling { animation:tv-ticker-scroll 28s linear infinite; }.tv-ticker-track span { display:inline-flex; align-items:center; gap:2.5vw; padding-right:2.5vw; white-space:nowrap; font-family:"IBM Plex Sans Condensed",sans-serif; font-size:clamp(2rem,3.5vw,4.5rem); font-weight:600; text-transform:uppercase; }.tv-ticker-track i { font-size:.35em; font-style:normal; }.tv-ticker-empty { padding-left:2vw; font-size:clamp(1.2rem,2vw,2.2rem); }
 @keyframes tv-ticker-scroll { to { transform:translateX(-50%); } }
 @media (prefers-reduced-motion:reduce) { .tv-ticker-track { animation:none; flex-wrap:wrap; width:auto; } }
+
+/* Venue television: 1366 x 668 and other short widescreen panels. */
+@media (min-width:1100px) and (max-height:720px) {
+  .tv-header { height:12vh; gap:2vw; padding:1.2vh 2vw; }
+  .tv-header > div:first-child { min-width:0; }
+  .tv-header h1 { overflow:hidden; font-size:clamp(2.2rem,3.25vw,2.85rem); line-height:.92; text-overflow:ellipsis; white-space:nowrap; }
+  .tv-kicker,.tv-section-label,.tv-event-meta span { margin-bottom:.25rem; font-size:clamp(.58rem,.72vw,.72rem); }
+  .tv-event-meta { display:flex; align-items:center; justify-content:flex-end; gap:1rem; max-width:24rem; }
+  .tv-event-meta span { display:none; }
+  .tv-event-meta strong { max-width:16rem; font-size:clamp(.72rem,1vw,.9rem); line-height:1.15; }
+  .tv-fullscreen-button { flex:0 0 auto; margin-top:0; padding:.4rem .6rem; font-size:.62rem; }
+
+  .tv-stage { height:76vh; grid-template-columns:minmax(0,2fr) minmax(20rem,1fr); }
+  .tv-performer { padding:1.8vh 2vw; }
+  .tv-performer-content { height:calc(100% - 1.25rem); grid-template-columns:minmax(0,1.35fr) minmax(12rem,.65fr); gap:2vw; }
+  .tv-performer h2 { max-width:11ch; font-size:clamp(3.5rem,5.8vw,5rem); line-height:.88; }
+  .tv-real-name { margin:.45rem 0 .8rem; font-size:clamp(1rem,1.35vw,1.25rem); }
+  .tv-songs p { gap:.8rem; padding:.48rem 0; font-size:clamp(1rem,1.25vw,1.2rem); }
+  .tv-artist-note { display:-webkit-box; margin:.65rem 0 0; overflow:hidden; font-size:clamp(.78rem,.95vw,.95rem); line-height:1.28; -webkit-box-orient:vertical; -webkit-line-clamp:3; }
+  .tv-photo-frame { width:auto; height:min(44vh,294px); max-height:none; justify-self:end; }
+  .tv-photo-placeholder { font-size:2.6rem; }
+  .tv-state { min-height:42vh; font-size:clamp(2rem,3.6vw,3.4rem); }
+
+  .tv-sidebar { grid-template-rows:auto 1fr auto; }
+  .tv-sidebar section { min-height:0; padding:1.35vh 1.45vw; }
+  .tv-sidebar h2 { font-size:clamp(1.65rem,2.45vw,2.1rem); line-height:.88; }
+  .tv-sidebar h3 { font-size:clamp(1.25rem,1.8vw,1.55rem); line-height:.9; }
+  .tv-sidebar p { margin:.4rem 0 0; font-size:clamp(.68rem,.82vw,.78rem); line-height:1.28; }
+  .tv-qr-card { gap:1vw; }
+  .tv-qr-copy { max-width:14rem; }
+  .tv-qr-card svg { width:112px; height:112px; border-width:6px; }
+  .tv-donation-heading { align-items:center; }
+  .tv-donation-options { gap:.8vw; margin-top:.75vh; }
+  .tv-donation-option { gap:.5vw; }
+  .tv-donation-card svg { width:70px; height:70px; border-width:5px; }
+  .tv-donation-option strong { font-size:clamp(.82rem,1vw,.95rem); }
+  .tv-donation-option span { margin-top:.12rem; font-size:clamp(.5rem,.58vw,.62rem); }
+
+  .tv-ticker { height:12vh; }
+  .tv-ticker-label { padding:0 2vw; font-size:clamp(.85rem,1.1vw,1rem); }
+  .tv-ticker-track { flex:0 0 auto; flex-wrap:nowrap; width:max-content; }
+  .tv-ticker-track span { gap:2vw; padding-right:2vw; font-size:clamp(1.8rem,3vw,2.7rem); }
+  .tv-ticker-empty { font-size:clamp(1rem,1.5vw,1.35rem); }
+}
+
 @media (max-aspect-ratio:4/3) { .tv-stage { grid-template-columns:1fr; height:auto; }.tv-performer { border-right:0; border-bottom:2px solid #fcfcf8; }.tv-sidebar { grid-template-columns:repeat(3,1fr); grid-template-rows:auto; }.tv-display { overflow:auto; } }
