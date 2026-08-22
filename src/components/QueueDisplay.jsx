@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@dataClient'
+import { getSongTitles } from '../lib/songTitles'
 
 export default function QueueDisplay() {
   const [performers, setPerformers] = useState([])
@@ -79,8 +80,9 @@ export default function QueueDisplay() {
             <h3>{currentPerformer.stage_name}</h3>
             <p className="real-name">{currentPerformer.real_name}</p>
             <div className="songs">
-              <p><strong>1.</strong> {currentPerformer.song_1_title}</p>
-              <p><strong>2.</strong> {currentPerformer.song_2_title}</p>
+              {getSongTitles(currentPerformer).map((song, index) => (
+                <p key={`${currentPerformer.id}-song-${index}`}><strong>{index + 1}.</strong> {song}</p>
+              ))}
             </div>
             {currentPerformer.performer_notes && (
               <div className="performer-story">
@@ -118,8 +120,9 @@ export default function QueueDisplay() {
                 </div>
                 <p className="real-name">{p.real_name}</p>
                 <div className="on-deck-songs">
-                  <p><strong>1.</strong> {p.song_1_title}</p>
-                  <p><strong>2.</strong> {p.song_2_title}</p>
+                  {getSongTitles(p).map((song, index) => (
+                    <p key={`${p.id}-song-${index}`}><strong>{index + 1}.</strong> {song}</p>
+                  ))}
                 </div>
                 {p.performer_notes && (
                   <div className="on-deck-story">

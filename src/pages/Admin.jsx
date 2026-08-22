@@ -20,6 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 
 import { isAdminEmail } from '../lib/admin'
+import { getSongTitles } from '../lib/songTitles'
 
 function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete, onEdit }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -44,7 +45,7 @@ function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete,
           <small>{performer.real_name}</small>
         </div>
         <div className="songs-small">
-          {performer.song_1_title} / {performer.song_2_title}
+          {getSongTitles(performer).join(' / ')}
         </div>
         {performer.started_at && (
           <div className="timestamp-display">
@@ -329,7 +330,7 @@ export default function Admin({ onEditPerformer }) {
 
   function exportTimestamps() {
     const rows = [
-      ['Position', 'Stage Name', 'Real Name', 'Song 1', 'Song 2', 'Started', 'Finished', 'Duration (min)'],
+      ['Position', 'Stage Name', 'Real Name', 'Songs', 'Started', 'Finished', 'Duration (min)'],
     ]
 
     const allPerformers = [...performers].sort((a, b) => a.queue_position - b.queue_position)
@@ -344,8 +345,7 @@ export default function Admin({ onEditPerformer }) {
         idx + 1,
         p.stage_name,
         p.real_name,
-        p.song_1_title,
-        p.song_2_title,
+        getSongTitles(p).join(' | '),
         start ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
         end ? end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
         duration,
@@ -485,8 +485,9 @@ export default function Admin({ onEditPerformer }) {
               <h3>{currentPerformer.stage_name}</h3>
               <p className="real-name">{currentPerformer.real_name}</p>
               <div className="songs-list">
-                <p><strong>1.</strong> {currentPerformer.song_1_title}</p>
-                <p><strong>2.</strong> {currentPerformer.song_2_title}</p>
+                {getSongTitles(currentPerformer).map((song, index) => (
+                  <p key={`${currentPerformer.id}-song-${index}`}><strong>{index + 1}.</strong> {song}</p>
+                ))}
               </div>
               <div className="button-group">
                 <button onClick={() => onEditPerformer(currentPerformer.id)} className="btn btn-outline btn-small">

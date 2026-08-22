@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '@dataClient'
+import { getSongTitles } from '../lib/songTitles'
 import './TVDisplay.css'
 
 const PHONE_QUEUE_URL = import.meta.env.VITE_PHONE_QUEUE_URL || 'https://open-mic-queue.netlify.app/'
@@ -63,6 +64,8 @@ export default function TVDisplay() {
   const currentPerformer = activePerformers.find(performer => performer.current)
   const upcomingPerformers = activePerformers.filter(performer => !performer.current)
   const tickerItems = upcomingPerformers.length > 1 ? [...upcomingPerformers, ...upcomingPerformers] : upcomingPerformers
+  const currentSongs = getSongTitles(currentPerformer)
+  const visibleCurrentSongs = currentSongs.slice(0, 5)
 
   return (
     <div className="tv-display">
@@ -85,7 +88,14 @@ export default function TVDisplay() {
               <div className="tv-performer-copy">
                 <h2>{currentPerformer.stage_name}</h2>
                 {currentPerformer.real_name && currentPerformer.real_name !== currentPerformer.stage_name && <p className="tv-real-name">{currentPerformer.real_name}</p>}
-                <div className="tv-songs"><p><span>01</span>{currentPerformer.song_1_title}</p><p><span>02</span>{currentPerformer.song_2_title}</p></div>
+                <div className="tv-songs">
+                  {visibleCurrentSongs.map((song, index) => (
+                    <p key={`${currentPerformer.id}-song-${index}`}><span>{String(index + 1).padStart(2, '0')}</span>{song}</p>
+                  ))}
+                  {currentSongs.length > visibleCurrentSongs.length && (
+                    <p className="tv-more-songs"><span>+</span>{currentSongs.length - visibleCurrentSongs.length} more in featured set</p>
+                  )}
+                </div>
                 {currentPerformer.performer_notes && <p className="tv-artist-note">{currentPerformer.performer_notes}</p>}
               </div>
               <div className="tv-photo-frame">

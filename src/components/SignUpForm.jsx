@@ -3,6 +3,8 @@ import { supabase } from '@dataClient'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
 import { useAuth } from '../context/AuthContext'
 import { isAdminEmail } from '../lib/admin'
+import SongFields from './SongFields'
+import { normalizeSongTitles } from '../lib/songTitles'
 
 export default function SignUpForm({ onSuccess }) {
   const { user } = useAuth()
@@ -13,8 +15,7 @@ export default function SignUpForm({ onSuccess }) {
   const [formData, setFormData] = useState({
     stageName: '',
     realName: '',
-    song1: '',
-    song2: '',
+    songs: ['', ''],
     socialLinks: '',
     original: false,
     livestream: false,
@@ -41,6 +42,8 @@ export default function SignUpForm({ onSuccess }) {
       }
 
       const parsedSocialLinks = parseSocialLinks(formData.socialLinks)
+      const songTitles = normalizeSongTitles(formData.songs)
+      if (songTitles.length < 2) throw new Error('Please enter at least two songs')
 
       const { data: maxData } = await supabase
         .from('performers')
@@ -57,8 +60,9 @@ export default function SignUpForm({ onSuccess }) {
           email: entryOwner === 'guest' ? guestEmail : user.email,
           auth_user_id: entryOwner === 'guest' ? null : user.id,
           created_by: user.id,
-          song_1_title: formData.song1,
-          song_2_title: formData.song2,
+          song_1_title: songTitles[0],
+          song_2_title: songTitles[1],
+          song_titles: songTitles,
           social_links: parsedSocialLinks,
           original_confirmed: formData.original,
           livestream_confirmed: formData.livestream,
@@ -73,8 +77,7 @@ export default function SignUpForm({ onSuccess }) {
       setFormData({
         stageName: '',
         realName: '',
-        song1: '',
-        song2: '',
+        songs: ['', ''],
         socialLinks: '',
         original: false,
         livestream: false,
@@ -153,31 +156,11 @@ export default function SignUpForm({ onSuccess }) {
         />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="signup-song-1">Song 1 Title *</label>
-        <input
-          id="signup-song-1"
-          type="text"
-          name="song1"
-          value={formData.song1}
-          onChange={handleChange}
-          required
-          placeholder="First song you'll perform"
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="signup-song-2">Song 2 Title *</label>
-        <input
-          id="signup-song-2"
-          type="text"
-          name="song2"
-          value={formData.song2}
-          onChange={handleChange}
-          required
-          placeholder="Second song you'll perform"
-        />
-      </div>
+      <SongFields
+        idPrefix="signup-song"
+        songs={formData.songs}
+        onChange={(songs) => setFormData(prev => ({ ...prev, songs }))}
+      />
 
       <div className="form-group">
         <label htmlFor="signup-social-links">Social Links (paste URLs, one per line)</label>

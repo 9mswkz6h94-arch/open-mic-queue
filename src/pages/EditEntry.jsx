@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
+import SongFields from '../components/SongFields'
+import { getSongTitles, normalizeSongTitles } from '../lib/songTitles'
 
 export default function EditEntry({ onComplete, entryId = null, adminMode = false }) {
   const { user } = useAuth()
@@ -16,8 +18,7 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
   const [formData, setFormData] = useState({
     stageName: '',
     realName: '',
-    song1: '',
-    song2: '',
+    songs: ['', ''],
     socialLinks: '',
     notes: '',
     profilePictureUrl: '',
@@ -32,8 +33,10 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
     setFormData({
       stageName: data.stage_name || '',
       realName: data.real_name || '',
-      song1: data.song_1_title || '',
-      song2: data.song_2_title || '',
+      songs: (() => {
+        const songs = getSongTitles(data)
+        return songs.length >= 2 ? songs : [...songs, ...Array(2 - songs.length).fill('')]
+      })(),
       socialLinks: Object.values(data.social_links || {}).join('\n'),
       notes: data.performer_notes || '',
       profilePictureUrl: data.profile_picture_url || '',
@@ -139,14 +142,17 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
       setSuccess('')
 
       const parsedSocialLinks = parseSocialLinks(formData.socialLinks)
+      const songTitles = normalizeSongTitles(formData.songs)
+      if (songTitles.length < 2) throw new Error('Please enter at least two songs')
 
       console.log('Saving with picture URL:', formData.profilePictureUrl)
 
       const updateData = {
         stage_name: formData.stageName,
         real_name: formData.realName,
-        song_1_title: formData.song1,
-        song_2_title: formData.song2,
+        song_1_title: songTitles[0],
+        song_2_title: songTitles[1],
+        song_titles: songTitles,
         social_links: parsedSocialLinks,
         performer_notes: formData.notes,
       }
@@ -239,29 +245,11 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="edit-song-1">Song 1 Title *</label>
-          <input
-            id="edit-song-1"
-            type="text"
-            name="song1"
-            value={formData.song1}
-            onChange={handleChange}
-            placeholder="First song you'll perform"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="edit-song-2">Song 2 Title *</label>
-          <input
-            id="edit-song-2"
-            type="text"
-            name="song2"
-            value={formData.song2}
-            onChange={handleChange}
-            placeholder="Second song you'll perform"
-          />
-        </div>
+        <SongFields
+          idPrefix="edit-song"
+          songs={formData.songs}
+          onChange={(songs) => setFormData(prev => ({ ...prev, songs }))}
+        />
 
         <div className="form-group">
           <label htmlFor="edit-social-links">Social Links (paste URLs, one per line)</label>
