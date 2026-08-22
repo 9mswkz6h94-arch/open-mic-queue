@@ -54,11 +54,11 @@
   .tv-sidebar p { margin:.4rem 0 0; font-size:clamp(.68rem,.82vw,.78rem); line-height:1.28; }
   .tv-qr-card { gap:1vw; }
   .tv-qr-copy { max-width:14rem; }
-  .tv-qr-card svg { width:112px; height:112px; border-width:6px; }
+  .tv-qr-card svg { width:144px; height:144px; border-width:7px; }
   .tv-donation-heading { align-items:center; }
   .tv-donation-options { gap:.8vw; margin-top:.75vh; }
   .tv-donation-option { gap:.5vw; }
-  .tv-donation-card svg { width:70px; height:70px; border-width:5px; }
+  .tv-donation-card svg { width:92px; height:92px; border-width:6px; }
   .tv-donation-option strong { font-size:clamp(.82rem,1vw,.95rem); }
   .tv-donation-option span { margin-top:.12rem; font-size:clamp(.5rem,.58vw,.62rem); }
 
