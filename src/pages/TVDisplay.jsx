@@ -11,12 +11,58 @@ const SUPPORT_LINKS = [
   { label: 'Cash App', handle: '$rainbowheartstudio', url: 'https://cash.app/$rainbowheartstudio' },
   { label: 'Venmo', handle: '@rainbowheartstudio', url: 'https://venmo.com/rainbowheartstudio' },
 ]
+const DISPLAY_SIZES = ['standard', 'large', 'extra-large']
+const DISPLAY_SIZE_LABELS = { standard: 'Standard', large: 'Large', 'extra-large': 'Extra Large' }
+
+function getInitialDisplaySize() {
+  try {
+    const savedSize = window.localStorage.getItem('open-mic-tv-display-size')
+    return DISPLAY_SIZES.includes(savedSize) ? savedSize : 'large'
+  } catch {
+    return 'large'
+  }
+}
+
+function CalibrationView({ displaySize, onDisplaySizeChange, onClose }) {
+  return (
+    <main className="tv-calibration">
+      <div className="tv-calibration-safe-area">
+        <p className="tv-section-label">TV readability check</p>
+        <h2>Can you read this from the back of the room?</h2>
+        <p className="tv-calibration-copy">Set browser zoom to 100%, choose the smallest comfortable display size, then enter full screen.</p>
+        <div className="tv-calibration-grid">
+          <div>
+            <span className="tv-calibration-sample-label">Performer name</span>
+            <strong>Brother Jon</strong>
+            <span className="tv-calibration-song">01 &nbsp; Run Run</span>
+          </div>
+          <div className="tv-calibration-qr">
+            <QRCodeSVG value={PHONE_QUEUE_URL} size={180} bgColor="#ffffff" fgColor="#0a0a0a" level="M" />
+            <span>Scan-test from the audience area</span>
+          </div>
+        </div>
+        <div className="tv-calibration-actions">
+          <div className="tv-size-control" role="group" aria-label="Display text size">
+            {DISPLAY_SIZES.map(size => (
+              <button key={size} type="button" className={displaySize === size ? 'is-active' : ''} aria-pressed={displaySize === size} onClick={() => onDisplaySizeChange(size)}>
+                {DISPLAY_SIZE_LABELS[size]}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="tv-calibration-done" onClick={onClose}>Return to display</button>
+        </div>
+      </div>
+    </main>
+  )
+}
 
 export default function TVDisplay() {
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement || document.webkitFullscreenElement))
+  const [displaySize, setDisplaySize] = useState(getInitialDisplaySize)
+  const [isCalibrating, setIsCalibrating] = useState(() => new URLSearchParams(window.location.search).get('calibrate') === '1')
 
   useEffect(() => {
     let active = true
@@ -60,47 +106,77 @@ export default function TVDisplay() {
     }
   }
 
+  function changeDisplaySize(nextSize) {
+    if (!DISPLAY_SIZES.includes(nextSize)) return
+    setDisplaySize(nextSize)
+    try {
+      window.localStorage.setItem('open-mic-tv-display-size', nextSize)
+    } catch {
+      // The display still works when browser storage is unavailable.
+    }
+  }
+
   const activePerformers = useMemo(() => performers.filter(performer => !performer.attended), [performers])
   const currentPerformer = activePerformers.find(performer => performer.current)
   const upcomingPerformers = activePerformers.filter(performer => !performer.current)
   const tickerItems = upcomingPerformers.length > 1 ? [...upcomingPerformers, ...upcomingPerformers] : upcomingPerformers
   const currentSongs = getSongTitles(currentPerformer)
-  const visibleCurrentSongs = currentSongs.slice(0, 5)
+  const visibleSongLimit = displaySize === 'extra-large' ? 3 : displaySize === 'large' ? 4 : 5
+  const visibleCurrentSongs = currentSongs.slice(0, visibleSongLimit)
+  const hasPhoto = Boolean(currentPerformer?.profile_picture_url)
+  const hasArtistNote = Boolean(currentPerformer?.performer_notes?.trim())
+  const hasDistinctRealName = Boolean(currentPerformer?.real_name && currentPerformer.real_name !== currentPerformer.stage_name)
+  const performerNameLength = currentPerformer?.stage_name?.length || 0
+  const performerNameClass = performerNameLength > 48 ? 'tv-name-very-long' : performerNameLength > 24 ? 'tv-name-long' : ''
+  const contentNameClass = performerNameLength > 48 ? ' tv-content-very-long-name' : performerNameLength > 24 ? ' tv-content-long-name' : ''
+  const performerLayout = currentPerformer && !hasPhoto && !currentSongs.length && !hasArtistNote && !hasDistinctRealName
+    ? 'name-only'
+    : hasPhoto ? 'with-photo' : 'copy-only'
 
   return (
-    <div className="tv-display">
+    <div className={`tv-display tv-size-${displaySize}${isCalibrating ? ' is-calibrating' : ''}`}>
       <header className="tv-header">
         <div><p className="tv-kicker">Rainbow Heart Studio presents</p><h1>{EVENT_NAME}</h1></div>
         <div className="tv-event-meta">
           <span>Live tonight</span>
           <strong>{VENUE_NAME}</strong>
+          <div className="tv-size-control tv-size-control-compact" role="group" aria-label="Display text size">
+            {DISPLAY_SIZES.map(size => (
+              <button key={size} type="button" className={displaySize === size ? 'is-active' : ''} aria-pressed={displaySize === size} title={DISPLAY_SIZE_LABELS[size]} onClick={() => changeDisplaySize(size)}>
+                {size === 'extra-large' ? 'XL' : size.charAt(0).toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="tv-calibrate-button" onClick={() => setIsCalibrating(value => !value)}>
+            {isCalibrating ? 'Return' : 'Calibrate'}
+          </button>
           <button type="button" className="tv-fullscreen-button" onClick={toggleFullscreen}>
             {isFullscreen ? 'Exit full screen' : 'Full screen'}
           </button>
         </div>
       </header>
 
-      <main className="tv-stage">
+      {isCalibrating ? (
+        <CalibrationView displaySize={displaySize} onDisplaySizeChange={changeDisplaySize} onClose={() => setIsCalibrating(false)} />
+      ) : <><main className="tv-stage">
         <section className="tv-performer" aria-live="polite">
           <p className="tv-section-label">Now performing</p>
           {loading ? <div className="tv-state">Loading the live stage…</div> : error ? <div className="tv-state tv-state-error">Reconnecting to the live queue…</div> : currentPerformer ? (
-            <div className="tv-performer-content">
+            <div className={`tv-performer-content tv-layout-${performerLayout}${contentNameClass}`}>
               <div className="tv-performer-copy">
-                <h2>{currentPerformer.stage_name}</h2>
-                {currentPerformer.real_name && currentPerformer.real_name !== currentPerformer.stage_name && <p className="tv-real-name">{currentPerformer.real_name}</p>}
-                <div className="tv-songs">
+                <h2 className={performerNameClass}>{currentPerformer.stage_name}</h2>
+                {hasDistinctRealName && <p className="tv-real-name">{currentPerformer.real_name}</p>}
+                {currentSongs.length > 0 && <div className="tv-songs">
                   {visibleCurrentSongs.map((song, index) => (
                     <p key={`${currentPerformer.id}-song-${index}`}><span>{String(index + 1).padStart(2, '0')}</span>{song}</p>
                   ))}
                   {currentSongs.length > visibleCurrentSongs.length && (
                     <p className="tv-more-songs"><span>+</span>{currentSongs.length - visibleCurrentSongs.length} more in featured set</p>
                   )}
-                </div>
-                {currentPerformer.performer_notes && <p className="tv-artist-note">{currentPerformer.performer_notes}</p>}
+                </div>}
+                {hasArtistNote && <p className="tv-artist-note">{currentPerformer.performer_notes}</p>}
               </div>
-              <div className="tv-photo-frame">
-                {currentPerformer.profile_picture_url ? <img src={currentPerformer.profile_picture_url} alt={currentPerformer.stage_name} /> : <div className="tv-photo-placeholder" aria-hidden="true">LIVE</div>}
-              </div>
+              {hasPhoto && <div className="tv-photo-frame"><img src={currentPerformer.profile_picture_url} alt={currentPerformer.stage_name} /></div>}
             </div>
           ) : <div className="tv-state">The stage is ready. Next performer coming up soon.</div>}
         </section>
@@ -127,7 +203,7 @@ export default function TVDisplay() {
         <div className="tv-ticker-window">
           {tickerItems.length ? <div className={`tv-ticker-track ${upcomingPerformers.length > 1 ? 'is-scrolling' : ''}`}>{tickerItems.map((performer, index) => <span key={`${performer.id}-${index}`}>{performer.stage_name}<i aria-hidden="true">◆</i></span>)}</div> : <div className="tv-ticker-empty">Sign up from the phone queue to join tonight’s lineup.</div>}
         </div>
-      </footer>
+      </footer></>}
     </div>
   )
 }
