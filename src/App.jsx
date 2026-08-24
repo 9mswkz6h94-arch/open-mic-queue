@@ -30,7 +30,7 @@ function AppContent({ route }) {
     <div className="app">
       <EnvironmentBanner />
       <Navbar user={user} currentPage={currentPage} onPageChange={changePage} eventSlug={route.eventSlug} />
-      <main className="main-content">
+      <main className={`main-content${currentPage === 'admin' ? ' main-content-host' : ''}`}>
         {currentPage === 'home' && <Home user={user} onSignUpClick={() => changePage('signup')} />}
         {currentPage === 'signup' && <SignUp onSignUpComplete={() => changePage('home')} />}
         {currentPage === 'edit-entry' && (

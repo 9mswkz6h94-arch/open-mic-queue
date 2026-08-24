@@ -336,6 +336,14 @@
   gap: var(--scaffold-space-5);
 }
 
+.main-content.main-content-host {
+  max-width: 1920px;
+}
+
+.main-content-host .admin-page {
+  max-width: none;
+}
+
 @media (min-width: 1000px) {
   .host-command-grid {
     grid-template-columns: minmax(19rem, 0.8fr) minmax(32rem, 1.35fr);
@@ -343,6 +351,37 @@
 
   .host-command-history {
     grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1400px) {
+  .main-content.main-content-host {
+    padding-right: clamp(24px, 2.5vw, 48px);
+    padding-left: clamp(24px, 2.5vw, 48px);
+  }
+
+  .host-tv-preview-panel {
+    grid-template-columns: minmax(20rem, 0.8fr) minmax(32rem, 1.2fr);
+  }
+
+  .host-tv-preview-viewport {
+    width: 512px;
+    height: 288px;
+  }
+
+  .host-tv-preview-frame {
+    transform: scale(0.4);
+  }
+
+  .host-command-grid {
+    grid-template-columns:
+      minmax(20rem, 0.85fr)
+      minmax(34rem, 1.35fr)
+      minmax(20rem, 0.8fr);
+  }
+
+  .host-command-history {
+    grid-column: 3;
   }
 }
 
