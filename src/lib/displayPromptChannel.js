@@ -59,8 +59,23 @@ export async function readDisplayPrompt(eventSlug) {
 
 export async function createDisplayPrompt(eventSlug, eventId, prompt, userId) {
   if (isMockDisplayPromptChannel()) return { ...prompt, id: `mock-prompt-${Date.now()}` }
-  if (prompt.type !== 'announcement') throw new Error('Production supporter publication remains locked pending linked consent verification.')
   if (!eventId) throw new Error(`No durable event ID is available for ${eventSlug}.`)
+
+  if (prompt.type === 'supporter_acknowledgement') {
+    const { data, error } = await supabase.rpc('create_supporter_display_prompt', {
+      target_event_id: eventId,
+      supporter_display_name: prompt.supporterDisplayName,
+      approved_public_message: prompt.content,
+      consent_source: 'in_person_host_confirmation',
+      consent_evidence: {
+        confirmed_exact_name_and_message: true,
+        captured_in: 'host_hud',
+      },
+    })
+
+    if (error) throw error
+    return { ...prompt, id: data }
+  }
 
   const { data, error } = await supabase
     .from('display_prompts')

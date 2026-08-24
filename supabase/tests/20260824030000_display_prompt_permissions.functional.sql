@@ -143,18 +143,29 @@ begin
 end;
 $$;
 
+insert into public.consent_records (
+  id, event_id, subject_display_name, purpose, policy_version, granted, source
+) values (
+  '31000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000002',
+  'Sam', 'supporter_public_recognition', 'supporter-display-v1', true, 'test'
+);
+
 insert into public.supporter_acknowledgements (
-  id, event_id, display_name, approved_message, display_permission, moderation_status, published_at, expires_at
+  id, event_id, display_name, approved_message, display_permission, moderation_status,
+  consent_record_id, published_at, expires_at
 ) values (
   '30000000-0000-4000-8000-000000000001',
   '00000000-0000-4000-8000-000000000002',
-  'Sam', 'Thanks to Sam for supporting local music.', true, 'approved', now(), now() + interval '5 minutes'
+  'Sam', 'Thanks to Sam for supporting local music.', true, 'approved',
+  '31000000-0000-4000-8000-000000000001', now(), now() + interval '5 minutes'
 );
 
 delete from public.production_cues where metadata ->> 'display_prompt_id' = '20000000-0000-4000-8000-000000000001';
 delete from public.audit_events where target_id = '20000000-0000-4000-8000-000000000001';
 delete from public.display_prompts where id = '20000000-0000-4000-8000-000000000001';
 delete from public.supporter_acknowledgements where id = '30000000-0000-4000-8000-000000000001';
+delete from public.consent_records where id = '31000000-0000-4000-8000-000000000001';
 delete from public.event_roles where profile_id in (
   '10000000-0000-4000-8000-000000000001',
   '10000000-0000-4000-8000-000000000002',

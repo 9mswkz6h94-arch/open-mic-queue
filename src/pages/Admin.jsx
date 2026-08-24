@@ -102,6 +102,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
   const [tvPromptDraft, setTvPromptDraft] = useState(null)
   const [publicPromptType, setPublicPromptType] = useState('announcement')
   const [publicPromptMessage, setPublicPromptMessage] = useState('')
+  const [supporterDisplayName, setSupporterDisplayName] = useState('')
   const [supporterDisplayPermission, setSupporterDisplayPermission] = useState(false)
   const [publicPromptState, setPublicPromptState] = useState(null)
   const [publishConfirmed, setPublishConfirmed] = useState(false)
@@ -411,6 +412,10 @@ export default function Admin({ onEditPerformer, eventSlug }) {
       setError('Supporter recognition requires confirmed display permission.')
       return
     }
+    if (publicPromptType === 'supporter_acknowledgement' && !supporterDisplayName.trim()) {
+      setError('Enter the supporter’s exact approved public display name.')
+      return
+    }
     if (publicPromptType === 'supporter_acknowledgement' && isProductionDisplayPromptChannel()) {
       setError('Production supporter publication remains locked until display prompts are linked to verified supporter consent.')
       return
@@ -423,6 +428,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
         label: publicPromptType === 'announcement' ? 'Announcement' : 'Supporter acknowledgement',
         region: publicPromptType === 'announcement' ? 'ticker' : 'right_rail',
         content,
+        supporterDisplayName: supporterDisplayName.trim(),
         status: 'draft',
       }, user?.id)
       setPublicPromptState(draft)
@@ -731,6 +737,23 @@ export default function Admin({ onEditPerformer, eventSlug }) {
             </div>
           </div>
           <div className="form-group">
+            {publicPromptType === 'supporter_acknowledgement' && (
+              <>
+                <label htmlFor="supporter-display-name">Approved public display name</label>
+                <input
+                  id="supporter-display-name"
+                  value={supporterDisplayName}
+                  onChange={event => {
+                    setSupporterDisplayName(event.target.value)
+                    setPublicPromptState(null)
+                    setPublishConfirmed(false)
+                    setSupporterDisplayPermission(false)
+                  }}
+                  maxLength="80"
+                  placeholder="Sam"
+                />
+              </>
+            )}
             <label htmlFor="public-prompt-message">Exact public copy</label>
             <textarea
               id="public-prompt-message"
