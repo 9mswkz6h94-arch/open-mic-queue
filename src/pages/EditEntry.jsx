@@ -3,6 +3,7 @@ import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
 import SongFields from '../components/SongFields'
+import PageHeader from '../components/PageHeader'
 import { getSongTitles, normalizeSongTitles } from '../lib/songTitles'
 
 export default function EditEntry({ onComplete, entryId = null, adminMode = false }) {
@@ -34,7 +35,7 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
       stageName: data.stage_name || '',
       realName: data.real_name || '',
       songs: (() => {
-        const songs = getSongTitles(data)
+        const songs = getSongTitles(data, { fallbacks: false })
         return songs.length >= 2 ? songs : [...songs, ...Array(2 - songs.length).fill('')]
       })(),
       socialLinks: Object.values(data.social_links || {}).join('\n'),
@@ -188,11 +189,17 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
     return (
       <div className="signup-page">
         <div className="auth-form">
-          <h2>No Entry Found</h2>
-          <p>{error}</p>
-          <button onClick={onComplete} className="btn btn-primary">
-            Back to Queue
-          </button>
+          <PageHeader
+            eyebrow="Performer record"
+            title="No Entry Found"
+            description={error}
+            titleLevel={2}
+            actions={(
+              <button onClick={onComplete} className="btn btn-primary">
+                Back to Queue
+              </button>
+            )}
+          />
         </div>
       </div>
     )
@@ -201,8 +208,12 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
   return (
     <div className="signup-page">
       <div className="auth-form">
-        <p className="eyebrow">Performer record / 01</p>
-        <h2>{adminMode ? 'Edit Performer' : 'Edit Your Entries'}</h2>
+        <PageHeader
+          eyebrow={entry.entry_role === 'featured_artist' ? 'Featured Artist record / Extended set' : 'Performer record / 01'}
+          title={adminMode && entry.entry_role === 'featured_artist' ? 'Edit Featured Artist' : (adminMode ? 'Edit Performer' : 'Edit Your Entries')}
+          titleLevel={2}
+          description={entry.entry_role === 'featured_artist' ? 'Featured Artists can use up to seven song slots plus the existing photo, story, and social fields.' : undefined}
+        />
 
         {!adminMode && entries.length > 1 && (
           <div className="form-group">

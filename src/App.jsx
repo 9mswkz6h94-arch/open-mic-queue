@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import EnvironmentBanner from '@environmentBanner'
@@ -8,18 +8,18 @@ import EditEntry from './pages/EditEntry'
 import Admin from './pages/Admin'
 import AdminLogin from './pages/AdminLogin'
 import TVDisplay from './pages/TVDisplay'
+import NotFound from './pages/NotFound'
+import { navigate, parseLocation, pathForPage } from './lib/routes'
 import './App.css'
 
-const isTVDisplay = new URLSearchParams(window.location.search).get('display') === 'tv'
-
-function AppContent() {
+function AppContent({ route }) {
   const { user, loading } = useAuth()
-  const [currentPage, setCurrentPage] = useState('home')
   const [editingEntryId, setEditingEntryId] = useState(null)
+  const currentPage = route.page
 
   function changePage(page) {
     if (page !== 'edit-entry') setEditingEntryId(null)
-    setCurrentPage(page)
+    navigate(pathForPage(page, route.eventSlug))
   }
 
   if (loading) {
@@ -29,10 +29,10 @@ function AppContent() {
   return (
     <div className="app">
       <EnvironmentBanner />
-      <Navbar user={user} currentPage={currentPage} onPageChange={changePage} />
+      <Navbar user={user} currentPage={currentPage} onPageChange={changePage} eventSlug={route.eventSlug} />
       <main className="main-content">
-        {currentPage === 'home' && <Home user={user} onSignUpClick={() => setCurrentPage('signup')} />}
-        {currentPage === 'signup' && <SignUp onSignUpComplete={() => setCurrentPage('home')} />}
+        {currentPage === 'home' && <Home user={user} onSignUpClick={() => changePage('signup')} />}
+        {currentPage === 'signup' && <SignUp onSignUpComplete={() => changePage('home')} />}
         {currentPage === 'edit-entry' && (
           <EditEntry
             entryId={editingEntryId}
@@ -42,27 +42,36 @@ function AppContent() {
         )}
         {currentPage === 'admin-login' && (
           <AdminLogin
-            onLoginSuccess={() => setCurrentPage('admin')}
-            onCancel={() => setCurrentPage('home')}
+            onLoginSuccess={() => changePage('admin')}
+            onCancel={() => changePage('home')}
           />
         )}
         {currentPage === 'admin' && (
-          <Admin onEditPerformer={(id) => {
+          <Admin eventSlug={route.eventSlug} onEditPerformer={(id) => {
             setEditingEntryId(id)
-            setCurrentPage('edit-entry')
+            navigate(pathForPage('edit-entry', route.eventSlug))
           }} />
         )}
+        {currentPage === 'not-found' && <NotFound eventSlug={route.eventSlug} />}
       </main>
     </div>
   )
 }
 
 export default function App() {
-  if (isTVDisplay) return <TVDisplay />
+  const [route, setRoute] = useState(parseLocation)
+
+  useEffect(() => {
+    const syncRoute = () => setRoute(parseLocation())
+    window.addEventListener('popstate', syncRoute)
+    return () => window.removeEventListener('popstate', syncRoute)
+  }, [])
+
+  if (route.page === 'display') return <TVDisplay eventSlug={route.eventSlug} />
 
   return (
     <AuthProvider>
-      <AppContent />
+      <AppContent route={route} />
     </AuthProvider>
   )
 }

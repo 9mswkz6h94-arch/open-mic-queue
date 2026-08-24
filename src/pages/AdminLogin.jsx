@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import { isAdminEmail } from '../lib/admin'
+import PageHeader from '../components/PageHeader'
 
 export default function AdminLogin({ onLoginSuccess, onCancel }) {
   const { user } = useAuth()
@@ -46,9 +47,12 @@ export default function AdminLogin({ onLoginSuccess, onCancel }) {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
-        <p className="eyebrow">Restricted access</p>
-        <h2>Host Console</h2>
-        <p className="subtitle">Host controls only</p>
+        <PageHeader
+          eyebrow="Restricted access"
+          title="Host Console"
+          description="Host controls only"
+          titleLevel={2}
+        />
 
         {error && <div className="error-message">{error}</div>}
 

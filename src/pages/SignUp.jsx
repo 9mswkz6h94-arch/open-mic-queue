@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import SignUpForm from '../components/SignUpForm'
+import PageHeader from '../components/PageHeader'
 
 export default function SignUp({ onSignUpComplete }) {
   const { user } = useAuth()
@@ -69,8 +70,11 @@ export default function SignUp({ onSignUpComplete }) {
     return (
       <div className="signup-page">
         <div className="auth-form">
-          <p className="eyebrow">Performer access / 01</p>
-          <h2>{isLogin ? 'Log In' : 'Create Your Account'}</h2>
+          <PageHeader
+            eyebrow="Performer access / 01"
+            title={isLogin ? 'Log In' : 'Create Your Account'}
+            titleLevel={2}
+          />
 
           {error && <div className="error-message">{error}</div>}
 

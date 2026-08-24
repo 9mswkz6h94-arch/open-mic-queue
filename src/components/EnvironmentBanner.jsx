@@ -1,7 +1,8 @@
 import { dataMode, isMockMode } from '@dataClient'
 import { resetMockData } from '../lib/mockSupabaseClient'
+import { mockScenarioDescriptions } from '../lib/mockFixtures'
 
-const fixtures = ['default', 'empty', 'loading', 'error', 'long']
+const fixtures = ['default', 'empty', 'loading', 'error', 'long', 'missing-titles', 'featured-artist', 'cross-midnight', 'supporter', 'announcement', 'stress']
 
 export default function EnvironmentBanner() {
   if (!import.meta.env.DEV) return null
@@ -31,12 +32,15 @@ export default function EnvironmentBanner() {
         <span>{isMockMode ? 'Local fixture data only. Safe to operate and reset.' : 'Do not submit forms or use controls that change data.'}</span>
       </div>
       {isMockMode ? (
-        <label>
-          Fixture
-          <select value={activeFixture} onChange={loadFixture}>
-            {fixtures.map(fixture => <option key={fixture} value={fixture}>{fixture}</option>)}
-          </select>
-        </label>
+        <div>
+          <label>
+            Fixture
+            <select value={activeFixture} onChange={loadFixture}>
+              {fixtures.map(fixture => <option key={fixture} value={fixture}>{fixture}</option>)}
+            </select>
+          </label>
+          <span>{mockScenarioDescriptions[activeFixture]}</span>
+        </div>
       ) : (
         <button type="button" className="btn btn-small" onClick={enterMockMode}>Enter safe mock mode</button>
       )}

@@ -3,3 +3,12 @@ dist/
 .env.local
 .DS_Store
 *.log
+
+# Local Netlify folder
+.netlify
+
+# Local Supabase CLI state
+supabase/.temp/
+
+# Private local database backups
+backups/

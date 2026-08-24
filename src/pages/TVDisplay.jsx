@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '@dataClient'
 import { getSongTitles } from '../lib/songTitles'
+import { eventPath } from '../lib/routes'
+import { DISPLAY_PROMPT_EVENT, readDisplayPrompt } from '../lib/displayPromptChannel'
 import './TVDisplay.css'
 
-const PHONE_QUEUE_URL = import.meta.env.VITE_PHONE_QUEUE_URL || 'https://open-mic-queue.netlify.app/'
+const PUBLIC_APP_URL = import.meta.env.VITE_PUBLIC_APP_URL || 'https://open-mic-queue.netlify.app'
 const EVENT_NAME = import.meta.env.VITE_EVENT_NAME || 'Brother Jons Song Writer Open Mic'
 const VENUE_NAME = import.meta.env.VITE_VENUE_NAME || 'Presented by Rainbow Heart Studio'
 const SUPPORT_LINKS = [
@@ -23,7 +25,7 @@ function getInitialDisplaySize() {
   }
 }
 
-function CalibrationView({ displaySize, onDisplaySizeChange, onClose }) {
+function CalibrationView({ displaySize, onDisplaySizeChange, onClose, eventHomeUrl }) {
   return (
     <main className="tv-calibration">
       <div className="tv-calibration-safe-area">
@@ -37,7 +39,7 @@ function CalibrationView({ displaySize, onDisplaySizeChange, onClose }) {
             <span className="tv-calibration-song">01 &nbsp; Run Run</span>
           </div>
           <div className="tv-calibration-qr">
-            <QRCodeSVG value={PHONE_QUEUE_URL} size={180} bgColor="#ffffff" fgColor="#0a0a0a" level="M" />
+            <QRCodeSVG value={eventHomeUrl} size={180} bgColor="#ffffff" fgColor="#0a0a0a" level="M" />
             <span>Scan-test from the audience area</span>
           </div>
         </div>
@@ -56,13 +58,15 @@ function CalibrationView({ displaySize, onDisplaySizeChange, onClose }) {
   )
 }
 
-export default function TVDisplay() {
+export default function TVDisplay({ eventSlug }) {
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement || document.webkitFullscreenElement))
   const [displaySize, setDisplaySize] = useState(getInitialDisplaySize)
   const [isCalibrating, setIsCalibrating] = useState(() => new URLSearchParams(window.location.search).get('calibrate') === '1')
+  const [publishedPrompt, setPublishedPrompt] = useState(null)
+  const eventHomeUrl = import.meta.env.VITE_PHONE_QUEUE_URL || `${PUBLIC_APP_URL}${eventPath(eventSlug)}`
 
   useEffect(() => {
     let active = true
@@ -89,6 +93,28 @@ export default function TVDisplay() {
       document.removeEventListener('webkitfullscreenchange', syncFullscreenState)
     }
   }, [])
+
+  useEffect(() => {
+    let active = true
+    const syncPrompt = async () => {
+      try {
+        const prompt = await readDisplayPrompt(eventSlug)
+        if (active) setPublishedPrompt(prompt)
+      } catch (promptError) {
+        console.error('Display prompt unavailable:', promptError)
+      }
+    }
+    syncPrompt()
+    window.addEventListener('storage', syncPrompt)
+    window.addEventListener(DISPLAY_PROMPT_EVENT, syncPrompt)
+    const interval = window.setInterval(syncPrompt, 1000)
+    return () => {
+      active = false
+      window.removeEventListener('storage', syncPrompt)
+      window.removeEventListener(DISPLAY_PROMPT_EVENT, syncPrompt)
+      window.clearInterval(interval)
+    }
+  }, [eventSlug])
 
   async function toggleFullscreen() {
     try {
@@ -157,7 +183,7 @@ export default function TVDisplay() {
       </header>
 
       {isCalibrating ? (
-        <CalibrationView displaySize={displaySize} onDisplaySizeChange={changeDisplaySize} onClose={() => setIsCalibrating(false)} />
+        <CalibrationView displaySize={displaySize} onDisplaySizeChange={changeDisplaySize} onClose={() => setIsCalibrating(false)} eventHomeUrl={eventHomeUrl} />
       ) : <><main className="tv-stage">
         <section className="tv-performer" aria-live="polite">
           <p className="tv-section-label">Now performing</p>
@@ -183,7 +209,7 @@ export default function TVDisplay() {
 
         <aside className="tv-sidebar">
           <section className="tv-brand-card"><p className="tv-section-label">The studio</p><h2>Rainbow Heart Studio</h2><p>Music, creativity, lessons, and community built with heart.</p></section>
-          <section className="tv-qr-card"><div className="tv-qr-copy"><p className="tv-section-label">Explore the full queue</p><h3>Scan with your phone</h3><p>See the running order, song titles, artist stories, music, and performer links.</p></div><QRCodeSVG value={PHONE_QUEUE_URL} size={156} bgColor="#ffffff" fgColor="#0a0a0a" level="M" /></section>
+          <section className="tv-qr-card"><div className="tv-qr-copy"><p className="tv-section-label">Explore the full queue</p><h3>Scan with your phone</h3><p>See the running order, song titles, artist stories, music, and performer links.</p></div><QRCodeSVG value={eventHomeUrl} size={156} bgColor="#ffffff" fgColor="#0a0a0a" level="M" /></section>
           <section className="tv-donation-card">
             <div className="tv-donation-heading"><p className="tv-section-label">Keep local music growing</p><h3>Support the studio</h3></div>
             <div className="tv-donation-options">
@@ -195,13 +221,21 @@ export default function TVDisplay() {
               ))}
             </div>
           </section>
+          {publishedPrompt?.region === 'right_rail' && (
+            <section className="tv-published-prompt tv-prompt-right-rail" aria-live="polite">
+              <p className="tv-section-label">With gratitude</p>
+              <h3>{publishedPrompt.content}</h3>
+            </section>
+          )}
         </aside>
       </main>
 
-      <footer className="tv-ticker" aria-label="Upcoming performers">
-        <div className="tv-ticker-label">Up next</div>
+      <footer className={`tv-ticker${publishedPrompt?.region === 'ticker' ? ' has-published-prompt' : ''}`} aria-label={publishedPrompt?.region === 'ticker' ? 'Public announcement' : 'Upcoming performers'}>
+        <div className="tv-ticker-label">{publishedPrompt?.region === 'ticker' ? 'Announcement' : 'Up next'}</div>
         <div className="tv-ticker-window">
-          {tickerItems.length ? <div className={`tv-ticker-track ${upcomingPerformers.length > 1 ? 'is-scrolling' : ''}`}>{tickerItems.map((performer, index) => <span key={`${performer.id}-${index}`}>{performer.stage_name}<i aria-hidden="true">◆</i></span>)}</div> : <div className="tv-ticker-empty">Sign up from the phone queue to join tonight’s lineup.</div>}
+          {publishedPrompt?.region === 'ticker'
+            ? <div className="tv-prompt-ticker-copy" aria-live="polite">{publishedPrompt.content}</div>
+            : tickerItems.length ? <div className={`tv-ticker-track ${upcomingPerformers.length > 1 ? 'is-scrolling' : ''}`}>{tickerItems.map((performer, index) => <span key={`${performer.id}-${index}`}>{performer.stage_name}<i aria-hidden="true">◆</i></span>)}</div> : <div className="tv-ticker-empty">Sign up from the phone queue to join tonight’s lineup.</div>}
         </div>
       </footer></>}
     </div>

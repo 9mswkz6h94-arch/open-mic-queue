@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@dataClient'
 
 import { isAdminEmail } from '../lib/admin'
+import { pathForPage } from '../lib/routes'
 
-export default function Navbar({ user, currentPage, onPageChange }) {
+export default function Navbar({ user, currentPage, onPageChange, eventSlug }) {
   const isAdmin = isAdminEmail(user?.email)
   const [stageName, setStageName] = useState('')
 
@@ -59,7 +60,7 @@ export default function Navbar({ user, currentPage, onPageChange }) {
               {isAdmin && (
                 <>
                   <button onClick={() => onPageChange('admin')} className="btn btn-nav" aria-current={currentPage === 'admin' ? 'page' : undefined}>Host Console</button>
-                  <a href="/?display=tv" target="_blank" rel="noopener noreferrer" className="btn btn-nav">TV Display</a>
+                  <a href={pathForPage('display', eventSlug)} target="_blank" rel="noopener noreferrer" className="btn btn-nav">TV Display</a>
                 </>
               )}
               <span className="user-email" title={stageName || user.email}>Signed in / {stageName || user.email}</span>

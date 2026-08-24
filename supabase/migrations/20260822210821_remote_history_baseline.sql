@@ -1,0 +1,4 @@
+-- Historical migration already applied to production before this repository
+-- adopted local Supabase migration tracking. Its resulting schema is captured
+-- in the restore-verified pre-DATA-08 schema backup. This placeholder aligns
+-- local history and is never executed on production again.

@@ -1,17 +1,20 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { supabase } from '@dataClient'
 import { parseSocialLinks } from '../lib/socialLinkDetector'
 import { useAuth } from '../context/AuthContext'
 import { isAdminEmail } from '../lib/admin'
 import SongFields from './SongFields'
+import PageHeader from './PageHeader'
 import { normalizeSongTitles } from '../lib/songTitles'
 
-export default function SignUpForm({ onSuccess }) {
+export default function SignUpForm({ onSuccess, hostMode = false, existingPerformers = [] }) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [entryOwner, setEntryOwner] = useState('self')
+  const [entryOwner, setEntryOwner] = useState(hostMode ? 'guest' : 'self')
   const [guestEmail, setGuestEmail] = useState('')
+  const [selectedPerformerEmail, setSelectedPerformerEmail] = useState('')
+  const [performerSearch, setPerformerSearch] = useState('')
   const [formData, setFormData] = useState({
     stageName: '',
     realName: '',
@@ -31,12 +34,69 @@ export default function SignUpForm({ onSuccess }) {
     }))
   }
 
+  const normalizedSearch = performerSearch.trim().toLowerCase()
+  const performerMatches = useMemo(() => {
+    if (!hostMode || normalizedSearch.length < 2) return []
+
+    const seen = new Set()
+    return existingPerformers.filter((performer) => {
+      const searchable = [performer.stage_name, performer.real_name, performer.email]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      const identity = `${performer.stage_name || ''}|${performer.email || ''}`.toLowerCase()
+      if (!searchable.includes(normalizedSearch) || seen.has(identity)) return false
+      seen.add(identity)
+      return true
+    }).slice(0, 5)
+  }, [existingPerformers, hostMode, normalizedSearch])
+
+  const activeDuplicate = useMemo(() => {
+    if (!hostMode) return null
+    const email = (guestEmail || selectedPerformerEmail).trim().toLowerCase()
+    const stageName = formData.stageName.trim().toLowerCase()
+    if (!email && !stageName) return null
+
+    return existingPerformers.find((performer) => {
+      if (performer.attended) return false
+      const sameEmail = email && performer.email?.trim().toLowerCase() === email
+      const sameStageName = stageName && performer.stage_name?.trim().toLowerCase() === stageName
+      return sameEmail || sameStageName
+    }) || null
+  }, [existingPerformers, formData.stageName, guestEmail, hostMode, selectedPerformerEmail])
+
+  const selectPerformer = (performer) => {
+    const priorSongs = Array.isArray(performer.song_titles) && performer.song_titles.length
+      ? performer.song_titles
+      : [performer.song_1_title || '', performer.song_2_title || '']
+    const paddedSongs = priorSongs.map(song => typeof song === 'string' ? song : '')
+    while (paddedSongs.length < 2) paddedSongs.push('')
+    const priorSocialLinks = performer.social_links && typeof performer.social_links === 'object'
+      ? Object.values(performer.social_links).filter(link => typeof link === 'string').join('\n')
+      : ''
+
+    setFormData(prev => ({
+      ...prev,
+      stageName: performer.stage_name || '',
+      realName: performer.real_name || '',
+      songs: paddedSongs,
+      socialLinks: priorSocialLinks,
+    }))
+    setGuestEmail(performer.email || '')
+    setSelectedPerformerEmail(performer.email || '')
+    setPerformerSearch(performer.stage_name || performer.real_name || '')
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
+      if (activeDuplicate) {
+        throw new Error(`${activeDuplicate.stage_name} is already active in tonight's queue. Edit or requeue that entry instead.`)
+      }
+
       if (!formData.original || !formData.livestream || !formData.promotionalUse) {
         throw new Error('You must accept all terms to continue')
       }
@@ -57,7 +117,7 @@ export default function SignUpForm({ onSuccess }) {
         .insert({
           stage_name: formData.stageName,
           real_name: formData.realName,
-          email: entryOwner === 'guest' ? guestEmail : user.email,
+          email: entryOwner === 'guest' ? (guestEmail || selectedPerformerEmail) : user.email,
           auth_user_id: entryOwner === 'guest' ? null : user.id,
           created_by: user.id,
           song_1_title: songTitles[0],
@@ -85,8 +145,9 @@ export default function SignUpForm({ onSuccess }) {
         emailOptIn: false,
       })
       setGuestEmail('')
+      setSelectedPerformerEmail('')
 
-      onSuccess()
+      await onSuccess?.()
     } catch (err) {
       setError(err.message || 'Error signing up. Please try again.')
     } finally {
@@ -95,13 +156,46 @@ export default function SignUpForm({ onSuccess }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="signup-form">
-      <p className="eyebrow">Performer registration / 01</p>
-      <h2>Sign Up to Perform</h2>
+    <form onSubmit={handleSubmit} className={`signup-form${hostMode ? ' host-quick-signup' : ''}`}>
+      <PageHeader
+        eyebrow={hostMode ? 'Host workspace / Quick entry' : 'Performer registration / 01'}
+        title={hostMode ? 'Quick Signup' : 'Sign Up to Perform'}
+        titleLevel={2}
+        description={hostMode ? 'Find a returning performer or add a new guest without leaving the console.' : undefined}
+      />
 
       {error && <div className="error-message">{error}</div>}
 
-      {isAdminEmail(user?.email) && (
+      {hostMode && (
+        <div className="form-group performer-lookup">
+          <label htmlFor="host-performer-search">Find returning performer</label>
+          <input
+            id="host-performer-search"
+            type="search"
+            value={performerSearch}
+            onChange={(event) => setPerformerSearch(event.target.value)}
+            placeholder="Search name or email"
+            autoComplete="off"
+          />
+          {performerMatches.length > 0 && (
+            <div className="performer-lookup-results" aria-label="Matching performers">
+              {performerMatches.map(performer => (
+                <button
+                  key={performer.id}
+                  type="button"
+                  className="performer-lookup-result"
+                  onClick={() => selectPerformer(performer)}
+                >
+                  <strong>{performer.stage_name}</strong>
+                  <span>{performer.real_name}{performer.email ? ` · ${performer.email}` : ''}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {isAdminEmail(user?.email) && !hostMode && (
         <div className="form-group">
           <label htmlFor="signup-entry-owner">Who is this signup for?</label>
           <select
@@ -122,11 +216,20 @@ export default function SignUpForm({ onSuccess }) {
           <input
             id="signup-guest-email"
             type="email"
-            value={guestEmail}
-            onChange={(event) => setGuestEmail(event.target.value)}
+            value={guestEmail || selectedPerformerEmail}
+            onChange={(event) => {
+              setGuestEmail(event.target.value)
+              setSelectedPerformerEmail('')
+            }}
             required
             placeholder="performer@example.com"
           />
+        </div>
+      )}
+
+      {activeDuplicate && (
+        <div className="duplicate-warning" role="alert">
+          <strong>Already in tonight's queue:</strong> {activeDuplicate.stage_name}. Edit or requeue the existing entry instead of creating a duplicate.
         </div>
       )}
 
@@ -220,8 +323,8 @@ export default function SignUpForm({ onSuccess }) {
         </label>
       </div>
 
-      <button type="submit" className="btn btn-primary" disabled={loading}>
-        {loading ? 'Signing up...' : 'Sign Up to Perform'}
+      <button type="submit" className="btn btn-primary" disabled={loading || Boolean(activeDuplicate)}>
+        {loading ? 'Signing up...' : (hostMode ? 'Add to Queue' : 'Sign Up to Perform')}
       </button>
     </form>
   )
