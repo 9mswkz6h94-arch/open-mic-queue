@@ -355,16 +355,60 @@
 }
 
 @media (min-width: 1400px) {
+  .app-host {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
   .main-content.main-content-host {
+    display: flex;
+    min-height: 0;
     padding-right: clamp(24px, 2.5vw, 48px);
     padding-left: clamp(24px, 2.5vw, 48px);
+    padding-top: var(--scaffold-space-3);
+    padding-bottom: var(--scaffold-space-3);
+    overflow: hidden;
+  }
+
+  .main-content-host .admin-page {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .main-content-host .admin-page-header {
+    flex: 0 0 auto;
+    margin-bottom: var(--scaffold-space-3);
+  }
+
+  .main-content-host .admin-page-header .eyebrow {
+    width: 100%;
+    margin: 0;
+  }
+
+  .main-content-host .admin-page-header h2 {
+    font-size: clamp(2.25rem, 3.4vw, 3.75rem);
   }
 
   .host-tv-preview-panel {
-    grid-template-columns: minmax(20rem, 0.8fr) minmax(32rem, 1.2fr);
+    flex: 0 0 304px;
+    grid-template-columns: minmax(20rem, 0.85fr) 512px minmax(22rem, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--scaffold-space-3);
+    margin-bottom: var(--scaffold-space-3);
+    padding: var(--scaffold-space-3);
+    overflow: hidden;
+  }
+
+  .host-tv-preview-copy {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .host-tv-preview-viewport {
+    grid-column: 2;
+    grid-row: 1 / span 2;
     width: 512px;
     height: 288px;
   }
@@ -373,15 +417,90 @@
     transform: scale(0.4);
   }
 
+  .host-tv-prompt-controls {
+    grid-column: 1;
+    grid-row: 2;
+    align-content: start;
+  }
+
+  .host-tv-prompt-buttons {
+    gap: var(--scaffold-space-1);
+  }
+
+  .host-tv-prompt-draft {
+    min-height: 64px;
+    padding: var(--scaffold-space-2);
+  }
+
+  .host-public-prompt-workflow {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-content: start;
+    gap: var(--scaffold-space-2);
+    padding-top: 0;
+    padding-left: var(--scaffold-space-3);
+    border-top: 0;
+    border-left: 1px dashed var(--scaffold-line);
+    overflow-y: auto;
+  }
+
+  .host-public-prompt-workflow .form-group {
+    gap: var(--scaffold-space-1);
+    margin: 0;
+  }
+
+  .host-public-prompt-workflow .form-group textarea {
+    height: 52px;
+    min-height: 52px;
+    padding: var(--scaffold-space-2);
+    resize: none;
+  }
+
+  .host-tv-preview-panel > small {
+    display: none;
+  }
+
   .host-command-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
     grid-template-columns:
       minmax(20rem, 0.85fr)
       minmax(34rem, 1.35fr)
       minmax(20rem, 0.8fr);
   }
 
+  .host-command-stage,
+  .host-command-queue,
+  .host-command-history {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .host-command-history {
     grid-column: 3;
+  }
+
+  .host-command-grid .queue-progress,
+  .host-command-grid .queue-list-admin,
+  .host-command-grid .queue-list-completed,
+  .host-command-grid .admin-info {
+    padding: var(--scaffold-space-3);
+  }
+
+  .host-quick-signup-panel {
+    position: fixed;
+    z-index: 20;
+    inset: clamp(24px, 5vh, 64px) clamp(48px, 12vw, 220px);
+    margin: 0;
+    overflow-y: auto;
+    box-shadow: 0 16px 48px rgb(0 0 0 / 24%);
+  }
+
+  .main-content-host .development-tools {
+    display: none;
   }
 }
 

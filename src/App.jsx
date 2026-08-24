@@ -27,7 +27,7 @@ function AppContent({ route }) {
   }
 
   return (
-    <div className="app">
+    <div className={`app${currentPage === 'admin' ? ' app-host' : ''}`}>
       <EnvironmentBanner />
       <Navbar user={user} currentPage={currentPage} onPageChange={changePage} eventSlug={route.eventSlug} />
       <main className={`main-content${currentPage === 'admin' ? ' main-content-host' : ''}`}>
