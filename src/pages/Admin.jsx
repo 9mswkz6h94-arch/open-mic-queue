@@ -23,6 +23,7 @@ import { isAdminEmail } from '../lib/admin'
 import { getSongTitles } from '../lib/songTitles'
 import PageHeader from '../components/PageHeader'
 import SignUpForm from '../components/SignUpForm'
+import RunShowV2 from '../components/RunShowV2'
 import { pathForPage } from '../lib/routes'
 import {
   clearDisplayPrompt,
@@ -606,6 +607,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
   const currentSongIndex = currentPerformer ? (currentSongByPerformer[currentPerformer.id] ?? 0) : 0
   const tvPreviewUrl = `${pathForPage('display', eventSlug)}${window.location.search}`
   const currentSongTitle = currentPerformer ? getSongTitles(currentPerformer)[currentSongIndex] : null
+  const isRunShowV2 = import.meta.env.DEV && new URLSearchParams(window.location.search).get('hostLayout') === 'v2'
   const tvPromptOptions = [
     {
       type: 'active_song',
@@ -628,6 +630,43 @@ export default function Admin({ onEditPerformer, eventSlug }) {
       content: 'Performer signup is open — scan the Event Home QR to join the queue.',
     },
   ]
+
+  if (isRunShowV2) {
+    return (
+      <RunShowV2
+        currentPerformer={currentPerformer}
+        upcomingPerformers={upcomingPerformers}
+        completedPerformers={completedPerformers}
+        currentSongIndex={currentSongIndex}
+        currentSongTitle={currentSongTitle}
+        stageUndo={stageUndo}
+        onUndo={undoLastStageChange}
+        onQuickSignup={() => setQuickSignupOpen(open => !open)}
+        quickSignupOpen={quickSignupOpen}
+        quickSignupContent={quickSignupOpen ? (
+          <SignUpForm
+            hostMode
+            existingPerformers={performers}
+            onSuccess={async () => {
+              await fetchPerformers()
+              setQuickSignupOpen(false)
+            }}
+          />
+        ) : null}
+        tvPreviewUrl={tvPreviewUrl}
+        onExport={exportTimestamps}
+        onEdit={onEditPerformer}
+        onStart={markCurrent}
+        onFinishCurrent={skipPerformer}
+        onSelectSong={selectCurrentSong}
+        onMove={(performerId, direction) => {
+          const index = upcomingPerformers.findIndex(performer => performer.id === performerId)
+          const target = upcomingPerformers[index + direction]
+          if (target) handleDragEnd({ active: { id: performerId }, over: { id: target.id } })
+        }}
+      />
+    )
+  }
 
   return (
     <div className="admin-page">
