@@ -6,7 +6,7 @@ import SongFields from '../components/SongFields'
 import PageHeader from '../components/PageHeader'
 import { getSongTitles, normalizeSongTitles } from '../lib/songTitles'
 
-export default function EditEntry({ onComplete, entryId = null, adminMode = false }) {
+export default function EditEntry({ onComplete, entryId = null, adminMode = false, eventId }) {
   const { user } = useAuth()
   const [entries, setEntries] = useState([])
   const [entry, setEntry] = useState(null)
@@ -27,7 +27,7 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
 
   useEffect(() => {
     fetchEntries()
-  }, [user, entryId])
+  }, [user, entryId, eventId])
 
   function loadEntry(data) {
     setEntry(data)
@@ -49,6 +49,7 @@ export default function EditEntry({ onComplete, entryId = null, adminMode = fals
 
     try {
       let query = supabase.from('performers').select('*')
+      query = query.eq('event_id', eventId)
       query = entryId
         ? query.eq('id', entryId)
         : query.eq('auth_user_id', user.id).order('queue_position', { ascending: true })

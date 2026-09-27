@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@dataClient'
 import { getSongTitles } from '../lib/songTitles'
 
-export default function QueueDisplay() {
+export default function QueueDisplay({ eventId }) {
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -13,13 +13,14 @@ export default function QueueDisplay() {
     // Poll every 10 seconds for live updates
     const interval = setInterval(fetchPerformers, 10000)
     return () => clearInterval(interval)
-  }, [])
+  }, [eventId])
 
   async function fetchPerformers() {
     setError('')
     const { data, error } = await supabase
       .from('performers')
       .select('*')
+      .eq('event_id', eventId)
       .order('queue_position', { ascending: true })
 
     if (error) {

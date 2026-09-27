@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext'
 import QueueDisplay from '../components/QueueDisplay'
 import PageHeader from '../components/PageHeader'
 
-export default function Home({ onSignUpClick }) {
+export default function Home({ onSignUpClick, eventId }) {
   const { user } = useAuth()
 
   return (
@@ -19,7 +19,7 @@ export default function Home({ onSignUpClick }) {
         ) : null}
       />
 
-      <QueueDisplay />
+      <QueueDisplay eventId={eventId} />
     </div>
   )
 }

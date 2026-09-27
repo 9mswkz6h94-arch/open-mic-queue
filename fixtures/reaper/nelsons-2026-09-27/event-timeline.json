@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at_utc": "2026-09-28T05:45:00.000Z",
+  "event": {
+    "id": "00000000-0000-4000-8000-000000000927",
+    "slug": "nelsons-open-mic-2026-09-27",
+    "title": "Nelson's Open Mic",
+    "timezone": "America/Chicago"
+  },
+  "recording": {
+    "id": "10000000-0000-4000-8000-000000000927",
+    "label": "Main recording 1",
+    "source_kind": "reaper_multitrack",
+    "started_at_utc": "2026-09-28T00:30:00.000Z",
+    "ended_at_utc": "2026-09-28T00:38:30.000Z",
+    "filename": "Nelsons_20260927_01.wav",
+    "device_note": "Synthetic fixture; no personal data"
+  },
+  "cues": [
+    { "marker_id": "cue-001", "client_cue_id": "client-001", "sequence_number": 1, "cue_type": "recording_started", "occurred_at_utc": "2026-09-28T00:30:00.000Z", "server_received_at_utc": "2026-09-28T00:30:00.020Z", "recording_seconds": 0, "performer_id": null, "performer_stage_name": null, "song_id": null, "song_index": null, "song_title": null, "note": null, "edit_marker": false, "publication_status": "internal", "corrects_marker_id": null },
+    { "marker_id": "cue-002", "client_cue_id": "client-002", "sequence_number": 2, "cue_type": "performer_started", "occurred_at_utc": "2026-09-28T00:30:15.250Z", "server_received_at_utc": "2026-09-28T00:30:15.270Z", "recording_seconds": 15.25, "performer_id": "entry-ada", "performer_stage_name": "Ada Blue", "song_id": null, "song_index": null, "song_title": null, "note": null, "edit_marker": false, "publication_status": "internal", "corrects_marker_id": null },
+    { "marker_id": "cue-003", "client_cue_id": "client-003", "sequence_number": 3, "cue_type": "song_started", "occurred_at_utc": "2026-09-28T00:30:30.500Z", "server_received_at_utc": "2026-09-28T00:30:30.520Z", "recording_seconds": 30.5, "performer_id": "entry-ada", "performer_stage_name": "Ada Blue", "song_id": "song-river", "song_index": 1, "song_title": "River Road", "note": null, "edit_marker": false, "publication_status": "internal", "corrects_marker_id": null },
+    { "marker_id": "cue-004", "client_cue_id": "client-004", "sequence_number": 4, "cue_type": "highlight", "occurred_at_utc": "2026-09-28T00:32:10.000Z", "server_received_at_utc": "2026-09-28T00:32:10.020Z", "recording_seconds": 130, "performer_id": "entry-ada", "performer_stage_name": "Ada Blue", "song_id": "song-river", "song_index": 1, "song_title": "River Road", "note": "Strong chorus", "edit_marker": true, "publication_status": "approved", "corrects_marker_id": null },
+    { "marker_id": "cue-005", "client_cue_id": "client-005", "sequence_number": 5, "cue_type": "song_ended", "occurred_at_utc": "2026-09-28T00:34:00.000Z", "server_received_at_utc": "2026-09-28T00:34:00.020Z", "recording_seconds": 240, "performer_id": "entry-ada", "performer_stage_name": "Ada Blue", "song_id": "song-river", "song_index": 1, "song_title": "River Road", "note": null, "edit_marker": false, "publication_status": "internal", "corrects_marker_id": null },
+    { "marker_id": "cue-006", "client_cue_id": "client-006", "sequence_number": 6, "cue_type": "changeover_started", "occurred_at_utc": "2026-09-28T00:34:20.000Z", "server_received_at_utc": "2026-09-28T00:34:20.020Z", "recording_seconds": 260, "performer_id": null, "performer_stage_name": null, "song_id": null, "song_index": null, "song_title": null, "note": "Cable swap", "edit_marker": true, "publication_status": "internal", "corrects_marker_id": null },
+    { "marker_id": "cue-007", "client_cue_id": "client-007", "sequence_number": 7, "cue_type": "changeover_ended", "occurred_at_utc": "2026-09-28T00:35:00.000Z", "server_received_at_utc": "2026-09-28T00:35:00.020Z", "recording_seconds": 300, "performer_id": null, "performer_stage_name": null, "song_id": null, "song_index": null, "song_title": null, "note": null, "edit_marker": true, "publication_status": "internal", "corrects_marker_id": null },
+    { "marker_id": "cue-008", "client_cue_id": "client-008", "sequence_number": 8, "cue_type": "recording_stopped", "occurred_at_utc": "2026-09-28T00:38:30.000Z", "server_received_at_utc": "2026-09-28T00:38:30.020Z", "recording_seconds": 510, "performer_id": null, "performer_stage_name": null, "song_id": null, "song_index": null, "song_title": null, "note": "End of fixture", "edit_marker": false, "publication_status": "internal", "corrects_marker_id": null }
+  ]
+}

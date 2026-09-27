@@ -7,7 +7,7 @@ import SongFields from './SongFields'
 import PageHeader from './PageHeader'
 import { normalizeSongTitles } from '../lib/songTitles'
 
-export default function SignUpForm({ onSuccess, hostMode = false, existingPerformers = [] }) {
+export default function SignUpForm({ onSuccess, hostMode = false, existingPerformers = [], eventId }) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -108,6 +108,7 @@ export default function SignUpForm({ onSuccess, hostMode = false, existingPerfor
       const { data: maxData } = await supabase
         .from('performers')
         .select('queue_position')
+        .eq('event_id', eventId)
         .order('queue_position', { ascending: false })
         .limit(1)
       const nextPosition = (maxData?.[0]?.queue_position ?? 0) + 1
@@ -115,6 +116,7 @@ export default function SignUpForm({ onSuccess, hostMode = false, existingPerfor
       const { error: insertError } = await supabase
         .from('performers')
         .insert({
+          event_id: eventId,
           stage_name: formData.stageName,
           real_name: formData.realName,
           email: entryOwner === 'guest' ? (guestEmail || selectedPerformerEmail) : user.email,

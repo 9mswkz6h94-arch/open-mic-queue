@@ -4,6 +4,7 @@ import { supabase } from '@dataClient'
 import { getSongTitles } from '../lib/songTitles'
 import { eventPath } from '../lib/routes'
 import { DISPLAY_PROMPT_EVENT, readDisplayPrompt } from '../lib/displayPromptChannel'
+import { useEventRecord } from '../lib/eventContext'
 import './TVDisplay.css'
 
 const PUBLIC_APP_URL = import.meta.env.VITE_PUBLIC_APP_URL || 'https://open-mic-queue.netlify.app'
@@ -59,6 +60,7 @@ function CalibrationView({ displaySize, onDisplaySizeChange, onClose, eventHomeU
 }
 
 export default function TVDisplay({ eventSlug }) {
+  const { event, loading: eventLoading, error: eventError } = useEventRecord(eventSlug)
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -71,7 +73,8 @@ export default function TVDisplay({ eventSlug }) {
   useEffect(() => {
     let active = true
     async function loadQueue() {
-      const { data, error: queueError } = await supabase.from('performers').select('*').order('queue_position', { ascending: true })
+      if (!event?.id) return
+      const { data, error: queueError } = await supabase.from('performers').select('*').eq('event_id', event.id).order('queue_position', { ascending: true })
       if (!active) return
       if (queueError) setError(queueError.message || 'Live queue unavailable')
       else { setPerformers(data || []); setError('') }
@@ -80,7 +83,7 @@ export default function TVDisplay({ eventSlug }) {
     loadQueue()
     const interval = window.setInterval(loadQueue, 5000)
     return () => { active = false; window.clearInterval(interval) }
-  }, [])
+  }, [event?.id])
 
   useEffect(() => {
     const syncFullscreenState = () => {
@@ -187,7 +190,7 @@ export default function TVDisplay({ eventSlug }) {
       ) : <><main className="tv-stage">
         <section className="tv-performer" aria-live="polite">
           <p className="tv-section-label">Now performing</p>
-          {loading ? <div className="tv-state">Loading the live stage…</div> : error ? <div className="tv-state tv-state-error">Reconnecting to the live queue…</div> : currentPerformer ? (
+          {loading || eventLoading ? <div className="tv-state">Loading the live stage…</div> : error || eventError ? <div className="tv-state tv-state-error">Reconnecting to the live queue…</div> : currentPerformer ? (
             <div className={`tv-performer-content tv-layout-${performerLayout}${contentNameClass}`}>
               <div className="tv-performer-copy">
                 <h2 className={performerNameClass}>{currentPerformer.stage_name}</h2>

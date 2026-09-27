@@ -1,4 +1,5 @@
 const base = {
+  event_id: '00000000-0000-4000-8000-000000000002',
   original_confirmed: true,
   livestream_confirmed: true,
   radio_featured_confirmed: true,

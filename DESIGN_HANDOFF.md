@@ -4,7 +4,7 @@
 **Design-system version:** `0.1.3`  
 **Current phase:** Scaffold review  
 **Target identity:** Prism  
-**Last updated:** 2026-08-09  
+**Last updated:** 2026-09-27
 
 ## Read first
 
@@ -20,6 +20,8 @@
 The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/VISUAL_IDENTITY_SYSTEM.md` captures the Open Mic conversation that seeded the shared system and should not supersede it.
 
 ## Completed
+
+0. On the isolated `feat/reaper-timeline` branch, added an event-scoped, append-only recording timeline, host recording/marker/gap controls, privacy-limited JSON/CSV/REAPER exports, deterministic mock persistence, a synthetic Nelson's fixture, and migration/rollback files. No production migration or deployment was performed. See `docs/REAPER_TIMELINE_ARCHITECTURE.md`.
 
 1. Added Jonathan's email to the local admin allowlist.
 2. Created a neutral Scaffold theme in `src/themes/scaffold.css`.
@@ -74,6 +76,8 @@ The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/V
 These are static-review observations, not completed workflow approval. The authoritative gate status and missing evidence are recorded in `SCAFFOLD_REVIEW.md`.
 
 ## Known issues
+
+- The timeline branch still needs an atomic database RPC joining performer state transitions to cue writes and an offline IndexedDB outbox before production activation. The current migration is intentionally unapplied.
 
 - The existing signup is still one long form; the six-screen tablet kiosk flow is specified but not implemented.
 - Guest-facing radio-show consent has been replaced with Open Mic social-media, event-promotion, and future-show promotional consent. Its value temporarily maps to the legacy `radio_featured_confirmed` column until a separately approved migration renames it.

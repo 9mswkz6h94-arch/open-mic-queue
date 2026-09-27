@@ -10,19 +10,21 @@ import AdminLogin from './pages/AdminLogin'
 import TVDisplay from './pages/TVDisplay'
 import NotFound from './pages/NotFound'
 import { navigate, parseLocation, pathForPage } from './lib/routes'
+import { useEventRecord } from './lib/eventContext'
 import './App.css'
 
 function AppContent({ route }) {
   const { user, loading } = useAuth()
   const [editingEntryId, setEditingEntryId] = useState(null)
   const currentPage = route.page
+  const { event, loading: eventLoading, error: eventError } = useEventRecord(route.eventSlug)
 
   function changePage(page) {
     if (page !== 'edit-entry') setEditingEntryId(null)
     navigate(pathForPage(page, route.eventSlug))
   }
 
-  if (loading) {
+  if (loading || eventLoading) {
     return <div className="loading">Loading...</div>
   }
 
@@ -31,12 +33,14 @@ function AppContent({ route }) {
       <EnvironmentBanner />
       <Navbar user={user} currentPage={currentPage} onPageChange={changePage} eventSlug={route.eventSlug} />
       <main className={`main-content${currentPage === 'admin' ? ' main-content-host' : ''}`}>
-        {currentPage === 'home' && <Home user={user} onSignUpClick={() => changePage('signup')} />}
-        {currentPage === 'signup' && <SignUp onSignUpComplete={() => changePage('home')} />}
-        {currentPage === 'edit-entry' && (
+        {eventError && <div className="error-message" role="alert">{eventError}</div>}
+        {currentPage === 'home' && event && <Home eventId={event.id} user={user} onSignUpClick={() => changePage('signup')} />}
+        {currentPage === 'signup' && event && <SignUp eventId={event.id} onSignUpComplete={() => changePage('home')} />}
+        {currentPage === 'edit-entry' && event && (
           <EditEntry
             entryId={editingEntryId}
             adminMode={Boolean(editingEntryId)}
+            eventId={event?.id}
             onComplete={() => changePage(editingEntryId ? 'admin' : 'home')}
           />
         )}
@@ -46,8 +50,8 @@ function AppContent({ route }) {
             onCancel={() => changePage('home')}
           />
         )}
-        {currentPage === 'admin' && (
-          <Admin eventSlug={route.eventSlug} onEditPerformer={(id) => {
+        {currentPage === 'admin' && event && (
+          <Admin eventSlug={route.eventSlug} event={event} onEditPerformer={(id) => {
             setEditingEntryId(id)
             navigate(pathForPage('edit-entry', route.eventSlug))
           }} />

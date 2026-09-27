@@ -20,6 +20,7 @@ export default function RunShowV2({
   onFinishCurrent,
   onSelectSong,
   onMove,
+  productionControls,
 }) {
   const [selectedId, setSelectedId] = useState(currentPerformer?.id || upcomingPerformers[0]?.id || null)
   const [drawer, setDrawer] = useState(null)
@@ -61,6 +62,8 @@ export default function RunShowV2({
           <button className="btn btn-outline btn-small" onClick={() => openDrawer('tv')}>TV & Messages</button>
         </div>
       </header>
+
+      {productionControls}
 
       <main className="run-show-workspace">
         <section className="run-show-queue" aria-labelledby="run-show-queue-title">

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import SignUpForm from '../components/SignUpForm'
 import PageHeader from '../components/PageHeader'
 
-export default function SignUp({ onSignUpComplete }) {
+export default function SignUp({ onSignUpComplete, eventId }) {
   const { user } = useAuth()
   const [step, setStep] = useState(user ? 'form' : 'auth')
   const [isLogin, setIsLogin] = useState(false)
@@ -130,7 +130,7 @@ export default function SignUp({ onSignUpComplete }) {
 
   return (
     <div className="signup-page">
-      <SignUpForm onSuccess={onSignUpComplete} />
+      <SignUpForm eventId={eventId} onSuccess={onSignUpComplete} />
     </div>
   )
 }

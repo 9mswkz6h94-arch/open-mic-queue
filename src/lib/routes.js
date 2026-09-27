@@ -18,9 +18,6 @@ export function parseLocation(location = window.location) {
   }
 
   if (segments[0] === 'e' && segments[1]) {
-    if (segments[1] !== DEFAULT_EVENT_SLUG) {
-      return { page: 'not-found', eventSlug: DEFAULT_EVENT_SLUG, requestedEventSlug: segments[1], legacy: false }
-    }
     const destination = segments[2] || 'home'
     const pages = { signup: 'signup', 'my-entry': 'edit-entry', queue: 'home', display: 'display' }
     return {
@@ -32,9 +29,6 @@ export function parseLocation(location = window.location) {
   }
 
   if (segments[0] === 'host' && segments[1] === 'events' && segments[2]) {
-    if (segments[2] !== DEFAULT_EVENT_SLUG) {
-      return { page: 'not-found', eventSlug: DEFAULT_EVENT_SLUG, requestedEventSlug: segments[2], legacy: false }
-    }
     return { page: 'admin', eventSlug: segments[2], legacy: false }
   }
 

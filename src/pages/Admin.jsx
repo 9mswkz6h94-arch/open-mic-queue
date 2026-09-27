@@ -24,7 +24,11 @@ import { getSongTitles } from '../lib/songTitles'
 import PageHeader from '../components/PageHeader'
 import SignUpForm from '../components/SignUpForm'
 import RunShowV2 from '../components/RunShowV2'
+import ProductionTimelineControls from '../components/ProductionTimelineControls'
 import { pathForPage } from '../lib/routes'
+import { loadTimeline, recordCue, startRecording } from '../lib/timelineClient'
+import { downloadTimelinePackage } from '../lib/timelineExports'
+import { deriveTimelineState } from '../lib/timelineState'
 import {
   clearDisplayPrompt,
   createDisplayPrompt,
@@ -90,7 +94,7 @@ function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete,
   )
 }
 
-export default function Admin({ onEditPerformer, eventSlug }) {
+export default function Admin({ onEditPerformer, eventSlug, event }) {
   const { user } = useAuth()
   const [performers, setPerformers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -99,7 +103,10 @@ export default function Admin({ onEditPerformer, eventSlug }) {
   const [isReordering, setIsReordering] = useState(false)
   const [quickSignupOpen, setQuickSignupOpen] = useState(false)
   const [currentSongByPerformer, setCurrentSongByPerformer] = useState({})
-  const [songCueLog, setSongCueLog] = useState([])
+  const [recordings, setRecordings] = useState([])
+  const [timelineCues, setTimelineCues] = useState([])
+  const [timelineStatus, setTimelineStatus] = useState('synced')
+  const [openGap, setOpenGap] = useState(null)
   const [tvPromptDraft, setTvPromptDraft] = useState(null)
   const [publicPromptType, setPublicPromptType] = useState('announcement')
   const [publicPromptMessage, setPublicPromptMessage] = useState('')
@@ -121,13 +128,87 @@ export default function Admin({ onEditPerformer, eventSlug }) {
     fetchPerformers()
     const interval = setInterval(fetchPerformers, 3000)
     return () => clearInterval(interval)
-  }, [user?.email])
+  }, [user?.email, event.id])
+
+  useEffect(() => {
+    if (!isAdminEmail(user?.email)) return undefined
+    refreshTimeline()
+    const interval = setInterval(refreshTimeline, 5000)
+    return () => clearInterval(interval)
+  }, [user?.email, event.id])
+
+  async function refreshTimeline() {
+    try {
+      const timeline = await loadTimeline(event.id)
+      setRecordings(timeline.recordings)
+      setTimelineCues(timeline.cues)
+      setTimelineStatus('synced')
+      const derived = deriveTimelineState(timeline.cues)
+      setOpenGap(derived.openGap)
+      if (derived.activeSong) setCurrentSongByPerformer(previous => ({ ...previous, [derived.activeSong.entryId]: derived.activeSong.position - 1 }))
+    } catch (timelineError) {
+      setTimelineStatus('error')
+      setError(`Timeline unavailable: ${timelineError.message}`)
+    }
+  }
+
+  const activeRecording = recordings.find(recording => !recording.ended_at) || null
+  const exportRecording = activeRecording || recordings.at(-1) || null
+
+  async function saveTimelineCue(cue) {
+    try {
+      setTimelineStatus('saving')
+      const saved = await recordCue({ eventId: event.id, recordingSessionId: activeRecording?.id || null, ...cue })
+      setTimelineCues(previous => previous.some(item => item.client_cue_id === saved.client_cue_id) ? previous : [...previous, saved])
+      setTimelineStatus('synced')
+      return saved
+    } catch (timelineError) {
+      setTimelineStatus('error')
+      setError(`Timeline cue was not saved: ${timelineError.message}`)
+      throw timelineError
+    }
+  }
+
+  async function startTimelineRecording({ filename }) {
+    try {
+      setTimelineStatus('saving')
+      const result = await startRecording({ event, label: `Main recording ${recordings.length + 1}`, filename, deviceNote: 'Started from Host Console' })
+      setRecordings(previous => [...previous, result.recording])
+      setTimelineCues(previous => [...previous, result.cue])
+      setTimelineStatus('synced')
+    } catch (timelineError) {
+      setTimelineStatus('error')
+      setError(`Recording anchor was not saved: ${timelineError.message}`)
+    }
+  }
+
+  async function stopTimelineRecording() {
+    if (!activeRecording) return
+    await saveTimelineCue({ cueType: 'recording_stopped', note: 'Recording stopped from Host Console' })
+    setRecordings(previous => previous.map(recording => recording.id === activeRecording.id ? { ...recording, ended_at: new Date().toISOString() } : recording))
+  }
+
+  async function addTimelineMarker(cueType, note, publicationStatus = 'internal') {
+    await saveTimelineCue({ cueType, note, isEditMarker: true, publicationStatus })
+  }
+
+  async function toggleTimelineGap(type, note) {
+    if (openGap) {
+      await saveTimelineCue({ cueType: `${openGap}_ended`, note, isEditMarker: true })
+      setOpenGap(null)
+    }
+    if (openGap !== type) {
+      await saveTimelineCue({ cueType: `${type}_started`, note, isEditMarker: true })
+      setOpenGap(type)
+    }
+  }
 
   async function fetchPerformers() {
     if (reorderingRef.current) return
     const { data, error: err } = await supabase
       .from('performers')
       .select('*')
+      .eq('event_id', event.id)
       .order('queue_position', { ascending: true })
 
     if (err) {
@@ -163,6 +244,8 @@ export default function Admin({ onEditPerformer, eventSlug }) {
         .eq('id', performerId)
       if (startError) throw startError
 
+      await saveTimelineCue({ cueType: 'performer_started', entryId: performerId, performerLabel: nextPerformer?.stage_name || null })
+
       setStageUndo({ label: `starting ${nextPerformer?.stage_name || 'performer'}`, snapshots })
       await fetchPerformers()
     } catch (err) {
@@ -184,12 +267,21 @@ export default function Admin({ onEditPerformer, eventSlug }) {
         .eq('id', performerId)
       if (completeError) throw completeError
 
+      const completingPerformer = performers.find(performer => performer.id === performerId)
+      const activeSongIndex = currentSongByPerformer[performerId]
+      if (activeSongIndex !== undefined) {
+        const songs = getSongTitles(completingPerformer)
+        await saveTimelineCue({ cueType: 'song_ended', entryId: performerId, performerLabel: completingPerformer?.stage_name || null, songPosition: activeSongIndex + 1, songLabel: songs[activeSongIndex] || `Song ${activeSongIndex + 1}` })
+      }
+      await saveTimelineCue({ cueType: 'performer_ended', entryId: performerId, performerLabel: completingPerformer?.stage_name || null })
+
       if (nextPerformer) {
         const { error: nextError } = await supabase
           .from('performers')
           .update({ current: true, attended: false, started_at: new Date().toISOString(), completed_at: null })
           .eq('id', nextPerformer.id)
         if (nextError) throw nextError
+        await saveTimelineCue({ cueType: 'performer_started', entryId: nextPerformer.id, performerLabel: nextPerformer.stage_name })
       }
 
       setStageUndo({ label: `advancing past ${snapshots[0]?.stage_name || 'performer'}`, snapshots })
@@ -224,6 +316,9 @@ export default function Admin({ onEditPerformer, eventSlug }) {
           .eq('id', id)
         if (restoreError) throw restoreError
       }
+
+      const lastCue = timelineCues.at(-1)
+      if (lastCue) await saveTimelineCue({ cueType: 'cue_corrected', correctsCueId: lastCue.id, note: `Host undo: ${stageUndo.label}`, isEditMarker: true, metadata: { correction_action: 'void' } })
 
       setStageUndo(null)
       await fetchPerformers()
@@ -336,6 +431,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
       const { error: clearError } = await supabase
         .from('performers')
         .delete()
+        .eq('event_id', event.id)
         .eq('attended', true)
       if (clearError) throw clearError
       setStageUndo(null)
@@ -383,24 +479,18 @@ export default function Admin({ onEditPerformer, eventSlug }) {
     }
   }
 
-  function selectCurrentSong(performer, songIndex) {
+  async function selectCurrentSong(performer, songIndex) {
     const songs = getSongTitles(performer)
     const safeIndex = Math.max(0, Math.min(songIndex, songs.length - 1))
     const previousIndex = currentSongByPerformer[performer.id] ?? 0
-    if (safeIndex === previousIndex && songCueLog.some(cue => cue.performerId === performer.id && cue.songIndex === safeIndex)) return
+    const timelineState = deriveTimelineState(timelineCues)
+    if (timelineState.activeSong?.entryId === performer.id && timelineState.activeSong.position === safeIndex + 1) return
 
-    const occurredAt = new Date().toISOString()
+    if (timelineState.activeSong?.entryId === performer.id) {
+      await saveTimelineCue({ cueType: 'song_ended', entryId: performer.id, performerLabel: performer.stage_name, songPosition: previousIndex + 1, songLabel: songs[previousIndex] })
+    }
+    await saveTimelineCue({ cueType: 'song_started', entryId: performer.id, performerLabel: performer.stage_name, songPosition: safeIndex + 1, songLabel: songs[safeIndex] })
     setCurrentSongByPerformer(previous => ({ ...previous, [performer.id]: safeIndex }))
-    setSongCueLog(previous => [
-      ...previous,
-      {
-        performerId: performer.id,
-        stageName: performer.stage_name,
-        songIndex: safeIndex,
-        songTitle: songs[safeIndex],
-        occurredAt,
-      },
-    ])
   }
 
   async function draftPublicPrompt() {
@@ -424,7 +514,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
     try {
       setError('')
       setPublishConfirmed(false)
-      const draft = await createDisplayPrompt(eventSlug, performers.find(performer => performer.event_id)?.event_id, {
+      const draft = await createDisplayPrompt(eventSlug, event.id, {
         type: publicPromptType,
         label: publicPromptType === 'announcement' ? 'Announcement' : 'Supporter acknowledgement',
         region: publicPromptType === 'announcement' ? 'ticker' : 'right_rail',
@@ -474,6 +564,10 @@ export default function Admin({ onEditPerformer, eventSlug }) {
   }
 
   function exportTimestamps() {
+    if (timelineCues.length > 0) {
+      downloadTimelinePackage({ event, recording: exportRecording, cues: timelineCues })
+      return
+    }
     const rows = [
       ['Position', 'Stage Name', 'Real Name', 'Songs', 'Started', 'Finished', 'Duration (min)'],
     ]
@@ -497,16 +591,16 @@ export default function Admin({ onEditPerformer, eventSlug }) {
       ])
     })
 
-    if (songCueLog.length > 0) {
+    if (timelineCues.length > 0) {
       rows.push([])
       rows.push(['Song Cues'])
       rows.push(['Stage Name', 'Song Number', 'Song Title', 'Occurred'])
-      songCueLog.forEach(cue => {
+      timelineCues.filter(cue => cue.cue_type === 'song_started').forEach(cue => {
         rows.push([
-          cue.stageName,
-          cue.songIndex + 1,
-          cue.songTitle,
-          new Date(cue.occurredAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          cue.performer_label_snapshot,
+          cue.song_position_snapshot,
+          cue.song_label_snapshot,
+          new Date(cue.client_occurred_at || cue.occurred_at).toISOString(),
         ])
       })
     }
@@ -534,6 +628,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
       const { error: deleteError } = await supabase
         .from('performers')
         .delete()
+        .eq('event_id', event.id)
         .gt('queue_position', 0)
 
       if (deleteError) throw new Error(`Delete failed: ${deleteError.message}`)
@@ -576,7 +671,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
         },
       ]
 
-      const { error: insertError } = await supabase.from('performers').insert(testPerformers)
+      const { error: insertError } = await supabase.from('performers').insert(testPerformers.map(performer => ({ ...performer, event_id: event.id })))
       if (insertError) throw new Error(`Insert failed: ${insertError.message}`)
 
       await fetchPerformers()
@@ -630,6 +725,20 @@ export default function Admin({ onEditPerformer, eventSlug }) {
       content: 'Performer signup is open — scan the Event Home QR to join the queue.',
     },
   ]
+  const productionControls = (
+    <ProductionTimelineControls
+      recording={activeRecording}
+      status={timelineStatus}
+      cueCount={timelineCues.length}
+      openGap={openGap}
+      onStartRecording={startTimelineRecording}
+      onStopRecording={stopTimelineRecording}
+      onMarker={addTimelineMarker}
+      onGap={toggleTimelineGap}
+      onResync={(note) => addTimelineMarker('recording_resynced', note)}
+      onExport={exportTimestamps}
+    />
+  )
 
   if (isRunShowV2) {
     return (
@@ -646,6 +755,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
         quickSignupContent={quickSignupOpen ? (
           <SignUpForm
             hostMode
+            eventId={event.id}
             existingPerformers={performers}
             onSuccess={async () => {
               await fetchPerformers()
@@ -659,6 +769,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
         onStart={markCurrent}
         onFinishCurrent={skipPerformer}
         onSelectSong={selectCurrentSong}
+        productionControls={productionControls}
         onMove={(performerId, direction) => {
           const index = upcomingPerformers.findIndex(performer => performer.id === performerId)
           const target = upcomingPerformers[index + direction]
@@ -696,6 +807,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
           </>
         )}
       />
+      {productionControls}
 
       {error && <div className="error-message">{error}</div>}
 
@@ -845,6 +957,7 @@ export default function Admin({ onEditPerformer, eventSlug }) {
         <section id="host-quick-signup-panel" className="host-quick-signup-panel" aria-label="Quick performer signup">
           <SignUpForm
             hostMode
+            eventId={event.id}
             existingPerformers={performers}
             onSuccess={async () => {
               await fetchPerformers()
