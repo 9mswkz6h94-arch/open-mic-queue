@@ -18,7 +18,7 @@ export default function ProductionTimelineControls({ recording, status, onStartR
       <div className="production-timeline-status">
         <span className="eyebrow">Recording timeline</span>
         <strong>{recording ? `Recording · ${recording.label}` : 'Not recording'}</strong>
-        <small className={`timeline-sync timeline-sync-${status}`}>{status === 'saving' ? 'Saving…' : status === 'error' ? 'Sync error' : 'Synced'} · {cueCount} cues</small>
+        <small className={`timeline-sync timeline-sync-${status}`}>{status === 'saving' ? 'Saving…' : status === 'pending' ? 'Pending sync' : status === 'error' ? 'Sync error' : 'Synced'} · {cueCount} cues</small>
       </div>
       <div className="production-timeline-primary">
         {!recording ? <button className="btn btn-primary" onClick={() => onStartRecording({ filename })}>Recording Started</button> : <button className="btn btn-outline" onClick={onStopRecording}>Recording Stopped</button>}

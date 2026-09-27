@@ -48,10 +48,10 @@ Exports contain stage-name snapshots and stable entry/song identifiers. They int
 ## Known follow-ups before live activation
 
 1. Apply the migration only after review against a disposable Supabase branch/project and run role/RLS checks there.
-2. Make performer row transitions and their timeline cues one database transaction. This branch makes cue writes durable and ordered, but the existing performer updates remain separate requests.
-3. Add an IndexedDB outbox for venue-network interruptions. Current retry IDs are safe, but unsent cues do not yet survive a browser crash.
+2. Execute the new atomic-transition migration in a disposable Supabase lab and complete the role/isolation/rollback matrix. The SQL and Host Console integration are implemented but have not been executed because no safe database target or running local Docker engine was available.
+3. Physically interrupt venue networking and restart the browser to validate the IndexedDB outbox beyond its persistence/replay unit tests. Recording-session creation remains intentionally online-only so downstream cues always have a durable recording anchor.
 4. Promote the verified local JSON-to-RPP adapter into the shared workflow and repeat the check against a copied real multitrack session. The synthetic fixture has already passed the initial importer verification described below.
-5. Exercise the new controls in mock mode at the four reference viewports, keyboard-only, 200% zoom, reduced motion, and the physical event tablet.
+5. Complete phone/tablet, 200% zoom, reduced-motion, and physical-event-tablet review. Desktop mock interaction and keyboard-visible semantics have passed an initial rendered check.
 
 ## Activation sequence
 
@@ -59,7 +59,7 @@ Exports contain stage-name snapshots and stable entry/song identifiers. They int
 2. Create a disposable Supabase environment and apply `20260927010000_reaper_timeline.sql`.
 3. Run the app in explicit sandbox mode; verify host/cohost success and anon/non-member denial.
 4. Import the fixture into a copied REAPER project and compare every marker/region time.
-5. Complete the atomic transition and offline-outbox follow-ups above.
+5. Complete the disposable-database and physical offline/device follow-ups above.
 6. Obtain a separate production go/no-go for migration and deployment.
 
 Rollback SQL is provided beside the migration. It is not an authorization to run it in production.
@@ -77,3 +77,13 @@ The companion recording workflow imported `fixtures/reaper/nelsons-2026-09-27/ev
 - Four importer unit tests passed, including append-only cue-correction handling
 
 This proves the synthetic interchange fixture and recording-side adapter agree. It does not authorize a production migration or replace verification against a copied real recording session.
+
+## Pre-production implementation evidence — 2026-09-27
+
+- `20260927020000_atomic_show_transitions.sql` adds event-locked SECURITY DEFINER transitions for performer start/advance, song start/end, gap replacement/closure, and append-only undo restoration. Recording stop remains atomic in the preceding RPC.
+- The production Host Console calls those RPCs; mock mode retains its isolated adapter.
+- Failed transport requests for cues, transitions, and undo operations are stored in IndexedDB with stable IDs and replayed in original order. Authorization, validation, and other non-network errors are not queued.
+- The interface distinguishes Saving, Pending sync, Synced, and Sync error.
+- Eight unit tests pass, including outbox reconstruction/replay, duplicate prevention, and failure retention.
+- A 1280×720 mock-isolated rendered workflow passed: recording start, song change, highlight, next performer, append-only undo, and recording stop produced eight cues and restored the show state without browser errors.
+- Disposable Supabase execution is blocked locally: the Supabase CLI is absent and Docker Desktop's engine is not running. No database was started and no remote project was touched.

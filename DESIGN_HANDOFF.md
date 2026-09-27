@@ -79,7 +79,7 @@ These are static-review observations, not completed workflow approval. The autho
 
 ## Known issues
 
-- The timeline branch still needs an atomic database RPC joining performer state transitions to cue writes and an offline IndexedDB outbox before production activation. The current migration is intentionally unapplied.
+- Atomic show-transition RPCs and a durable IndexedDB retry outbox are implemented on the isolated timeline branch. They still require disposable-Supabase execution and physical network-interruption/browser-restart evidence before production activation. The migrations remain intentionally unapplied.
 
 - The existing signup is still one long form; the six-screen tablet kiosk flow is specified but not implemented.
 - Guest-facing radio-show consent has been replaced with Open Mic social-media, event-promotion, and future-show promotional consent. Its value temporarily maps to the legacy `radio_featured_confirmed` column until a separately approved migration renames it.

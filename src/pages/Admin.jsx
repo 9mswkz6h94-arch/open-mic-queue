@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { supabase } from '@dataClient'
+import { isMockMode, supabase } from '@dataClient'
 import { useAuth } from '../context/AuthContext'
 import {
   DndContext,
@@ -26,7 +26,7 @@ import SignUpForm from '../components/SignUpForm'
 import RunShowV2 from '../components/RunShowV2'
 import ProductionTimelineControls from '../components/ProductionTimelineControls'
 import { pathForPage } from '../lib/routes'
-import { loadTimeline, recordCue, startRecording } from '../lib/timelineClient'
+import { applyShowTransition, loadTimeline, recordCue, startRecording, undoShowTransition } from '../lib/timelineClient'
 import { downloadTimelinePackage } from '../lib/timelineExports'
 import { deriveTimelineState } from '../lib/timelineState'
 import {
@@ -142,7 +142,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       const timeline = await loadTimeline(event.id)
       setRecordings(timeline.recordings)
       setTimelineCues(timeline.cues)
-      setTimelineStatus('synced')
+      setTimelineStatus(timeline.pendingCount ? 'pending' : timeline.replayErrors?.length ? 'error' : 'synced')
       const derived = deriveTimelineState(timeline.cues)
       setOpenGap(derived.openGap)
       if (derived.activeSong) setCurrentSongByPerformer(previous => ({ ...previous, [derived.activeSong.entryId]: derived.activeSong.position - 1 }))
@@ -160,7 +160,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       setTimelineStatus('saving')
       const saved = await recordCue({ eventId: event.id, recordingSessionId: activeRecording?.id || null, ...cue })
       setTimelineCues(previous => previous.some(item => item.client_cue_id === saved.client_cue_id) ? previous : [...previous, saved])
-      setTimelineStatus('synced')
+      setTimelineStatus(saved.pending_sync ? 'pending' : 'synced')
       return saved
     } catch (timelineError) {
       setTimelineStatus('error')
@@ -193,6 +193,14 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
   }
 
   async function toggleTimelineGap(type, note) {
+    if (!isMockMode) {
+      setTimelineStatus('saving')
+      const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'gap_set', intervalType: openGap === type ? null : type, note, cueIds: { gap_ended: crypto.randomUUID(), gap_started: crypto.randomUUID() } })
+      if (result.cues?.length) setTimelineCues(previous => [...previous, ...result.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
+      setOpenGap(openGap === type ? null : type)
+      setTimelineStatus(result.pending_sync ? 'pending' : 'synced')
+      return
+    }
     if (openGap) {
       await saveTimelineCue({ cueType: `${openGap}_ended`, note, isEditMarker: true })
       setOpenGap(null)
@@ -230,6 +238,12 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
         .filter((performer, index, list) => list.findIndex(item => item.id === performer.id) === index)
         .map(stageSnapshot)
 
+      if (!isMockMode) {
+        setTimelineStatus('saving')
+        const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'performer_start', entryId: performerId, cueIds: { performer_ended: crypto.randomUUID(), performer_started: crypto.randomUUID() } })
+        if (result.cues?.length) setTimelineCues(previous => [...previous, ...result.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
+        setTimelineStatus(result.pending_sync ? 'pending' : 'synced')
+      } else {
       if (currentPerformer && currentPerformer.id !== performerId) {
         const { error: clearError } = await supabase
           .from('performers')
@@ -245,6 +259,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       if (startError) throw startError
 
       await saveTimelineCue({ cueType: 'performer_started', entryId: performerId, performerLabel: nextPerformer?.stage_name || null })
+      }
 
       setStageUndo({ label: `starting ${nextPerformer?.stage_name || 'performer'}`, snapshots })
       await fetchPerformers()
@@ -261,6 +276,12 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
         .filter(Boolean)
         .map(stageSnapshot)
 
+      if (!isMockMode) {
+        setTimelineStatus('saving')
+        const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'performer_advance', entryId: performerId, nextEntryId: nextPerformer?.id, cueIds: { song_ended: crypto.randomUUID(), performer_ended: crypto.randomUUID(), performer_started: crypto.randomUUID() } })
+        if (result.cues?.length) setTimelineCues(previous => [...previous, ...result.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
+        setTimelineStatus(result.pending_sync ? 'pending' : 'synced')
+      } else {
       const { error: completeError } = await supabase
         .from('performers')
         .update({ attended: true, current: false, completed_at: new Date().toISOString() })
@@ -282,6 +303,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
           .eq('id', nextPerformer.id)
         if (nextError) throw nextError
         await saveTimelineCue({ cueType: 'performer_started', entryId: nextPerformer.id, performerLabel: nextPerformer.stage_name })
+      }
       }
 
       setStageUndo({ label: `advancing past ${snapshots[0]?.stage_name || 'performer'}`, snapshots })
@@ -308,6 +330,14 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
 
     try {
       setError('')
+      if (!isMockMode) {
+        const lastCue = timelineCues.at(-1)
+        if (lastCue) {
+          const saved = await undoShowTransition({ eventId: event.id, clientCueId: crypto.randomUUID(), correctsCueId: lastCue.id, snapshots: stageUndo.snapshots, note: `Host undo: ${stageUndo.label}` })
+          if (saved?.client_cue_id) setTimelineCues(previous => [...previous, saved])
+          setTimelineStatus(saved?.pending_sync ? 'pending' : 'synced')
+        }
+      } else {
       for (const snapshot of stageUndo.snapshots) {
         const { id, stage_name: _stageName, ...restoredState } = snapshot
         const { error: restoreError } = await supabase
@@ -319,6 +349,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
 
       const lastCue = timelineCues.at(-1)
       if (lastCue) await saveTimelineCue({ cueType: 'cue_corrected', correctsCueId: lastCue.id, note: `Host undo: ${stageUndo.label}`, isEditMarker: true, metadata: { correction_action: 'void' } })
+      }
 
       setStageUndo(null)
       await fetchPerformers()
@@ -486,10 +517,17 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
     const timelineState = deriveTimelineState(timelineCues)
     if (timelineState.activeSong?.entryId === performer.id && timelineState.activeSong.position === safeIndex + 1) return
 
+    if (!isMockMode) {
+      setTimelineStatus('saving')
+      const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'song_start', entryId: performer.id, songPosition: safeIndex + 1, songLabel: songs[safeIndex], cueIds: { song_ended: crypto.randomUUID(), song_started: crypto.randomUUID() } })
+      if (result.cues?.length) setTimelineCues(previous => [...previous, ...result.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
+      setTimelineStatus(result.pending_sync ? 'pending' : 'synced')
+    } else {
     if (timelineState.activeSong?.entryId === performer.id) {
       await saveTimelineCue({ cueType: 'song_ended', entryId: performer.id, performerLabel: performer.stage_name, songPosition: previousIndex + 1, songLabel: songs[previousIndex] })
     }
     await saveTimelineCue({ cueType: 'song_started', entryId: performer.id, performerLabel: performer.stage_name, songPosition: safeIndex + 1, songLabel: songs[safeIndex] })
+    }
     setCurrentSongByPerformer(previous => ({ ...previous, [performer.id]: safeIndex }))
   }
 
