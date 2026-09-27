@@ -54,6 +54,8 @@ The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/V
 
 ## Evidence collected
 
+- The companion recording workflow imported the checked-in Nelson's JSON fixture into a project copy with 8 cues, 6 logical entries, 8 REAPER marker/region lines, zero warnings, preserved source hashing, idempotent `[OMQ]` replacement, and four passing importer tests. This is synthetic integration evidence, not production activation approval.
+
 - Production build completed successfully with Vite on 2026-08-09.
 - Public queue was visually inspected at desktop width.
 - Signup was visually inspected at 1024×768 and 768×1024.

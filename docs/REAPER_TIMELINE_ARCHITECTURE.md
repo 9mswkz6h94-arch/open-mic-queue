@@ -50,7 +50,7 @@ Exports contain stage-name snapshots and stable entry/song identifiers. They int
 1. Apply the migration only after review against a disposable Supabase branch/project and run role/RLS checks there.
 2. Make performer row transitions and their timeline cues one database transaction. This branch makes cue writes durable and ordered, but the existing performer updates remain separate requests.
 3. Add an IndexedDB outbox for venue-network interruptions. Current retry IDs are safe, but unsent cues do not yet survive a browser crash.
-4. Add a local REAPER importer or ReaScript against the checked-in JSON fixture and verify generated regions against a copied multitrack session.
+4. Promote the verified local JSON-to-RPP adapter into the shared workflow and repeat the check against a copied real multitrack session. The synthetic fixture has already passed the initial importer verification described below.
 5. Exercise the new controls in mock mode at the four reference viewports, keyboard-only, 200% zoom, reduced motion, and the physical event tablet.
 
 ## Activation sequence
@@ -63,3 +63,17 @@ Exports contain stage-name snapshots and stable entry/song identifiers. They int
 6. Obtain a separate production go/no-go for migration and deployment.
 
 Rollback SQL is provided beside the migration. It is not an authorization to run it in production.
+
+## Recording-side integration evidence — 2026-09-27
+
+The companion recording workflow imported `fixtures/reaper/nelsons-2026-09-27/event-timeline.json` through its local JSON-to-RPP adapter:
+
+- 8 cues read
+- 6 logical entries produced
+- 8 REAPER marker/region lines written
+- 0 warnings
+- Recording start/stop, performer start, song region, highlight, and changeover region matched the expected positions
+- The importer wrote only a project copy, preserved the source hash, and replaced only its own prior `[OMQ]` entries on re-import
+- Four importer unit tests passed, including append-only cue-correction handling
+
+This proves the synthetic interchange fixture and recording-side adapter agree. It does not authorize a production migration or replace verification against a copied real recording session.
