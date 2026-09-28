@@ -2,7 +2,7 @@ import { dataMode, isMockMode } from '@dataClient'
 import { resetMockData } from '../lib/mockSupabaseClient'
 import { mockScenarioDescriptions } from '../lib/mockFixtures'
 
-const fixtures = ['default', 'empty', 'loading', 'error', 'long', 'missing-titles', 'featured-artist', 'cross-midnight', 'supporter', 'announcement', 'stress']
+const fixtures = ['default', 'empty', 'loading', 'error', 'long', 'missing-titles', 'featured-artist', 'tonight-show', 'cross-midnight', 'supporter', 'announcement', 'stress']
 
 export default function EnvironmentBanner() {
   if (!import.meta.env.DEV) return null

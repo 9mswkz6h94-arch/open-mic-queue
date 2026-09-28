@@ -6,6 +6,8 @@ const displaySource = await readFile(new URL('../src/pages/TVDisplay.jsx', impor
 const displayStyles = await readFile(new URL('../src/pages/TVDisplay.css', import.meta.url), 'utf8')
 const appEntry = await readFile(new URL('../src/index.jsx', import.meta.url), 'utf8')
 const spotlightStyles = await readFile(new URL('../src/themes/spotlight.css', import.meta.url), 'utf8')
+const fixtureSource = await readFile(new URL('../src/lib/mockFixtures.js', import.meta.url), 'utf8')
+const environmentBannerSource = await readFile(new URL('../src/components/EnvironmentBanner.jsx', import.meta.url), 'utf8')
 
 test('venue display keeps calibration controls out of the live header', () => {
   const liveHeader = displaySource.match(/<header className="tv-header">([\s\S]*?)<\/header>/)?.[1] || ''
@@ -55,4 +57,15 @@ test('Spotlight keeps structural state cues alongside purpose color', () => {
   assert.match(spotlightStyles, /\.completed-performer,[\s\S]*\.completed-item \{[^}]*border-left-color: var\(--spotlight-complete\);/)
   assert.match(spotlightStyles, /\.error-message \{[^}]*border-left: 5px solid var\(--spotlight-danger\);/)
   assert.match(spotlightStyles, /outline: 3px solid var\(--spotlight-focus\);/)
+})
+
+test('tonight show demo uses public presentation data and placeholder contact addresses', () => {
+  const tonightFixture = fixtureSource.match(/'tonight-show': \[([\s\S]*?)\n  \],/)?.[1] || ''
+  assert.match(tonightFixture, /stage_name: 'Brother Jon'/)
+  assert.match(tonightFixture, /profile_picture_url: 'https:\/\/azfexlhbiivcyjqfkgxz\.supabase\.co\/storage\/v1\/object\/public\/performers\/profile-pictures\//)
+  assert.match(tonightFixture, /stage_name: 'Charissa'/)
+  const emails = [...tonightFixture.matchAll(/email: '([^']+)'/g)].map((match) => match[1])
+  assert.ok(emails.length > 0)
+  assert.ok(emails.every((email) => email.endsWith('@example.test')))
+  assert.match(environmentBannerSource, /'tonight-show'/)
 })
