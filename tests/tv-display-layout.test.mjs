@@ -104,3 +104,14 @@ test('legacy host console removes the duplicate current-performer column', () =>
   assert.match(productionControlsSource, /Delete current performer/)
   assert.match(appStyles, /grid-template-columns:\s*minmax\(34rem, 1\.45fr\)\s*minmax\(20rem, 0\.75fr\)/)
 })
+
+test('legacy host console places the always-open timeline after the preview workspace', () => {
+  assert.ok(adminSource.indexOf('<section className="host-tv-preview-panel"') < adminSource.lastIndexOf('{productionControls}'))
+  assert.doesNotMatch(productionControlsSource, /More Timeline Tools/)
+  assert.match(productionControlsSource, /1 · Recording/)
+  assert.match(productionControlsSource, /2 · Live set/)
+  assert.match(productionControlsSource, /3 · Mark a moment/)
+  assert.match(productionControlsSource, /4 · Mark room time/)
+  assert.match(productionControlsSource, /Marker note \(optional\)/)
+  assert.match(productionControlsSource, /Export Timeline Package/)
+})

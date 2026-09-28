@@ -139,3 +139,11 @@ Complete responsive and workflow review of Spotlight across phone, tablet, deskt
 - Consolidated current-performer actions into the timeline's `Live Set` strip: edit performer/featured set, toggle featured status, finish the set and advance, and delete the current performer from the expanded timeline tools.
 - Preserved the Spotlight visual language and reclaimed the lower console for a wider `Up Next` workspace plus `Performed` history and queue totals.
 - Verification: 20 automated tests passed and the production Vite build completed with 114 modules. Review remained mock-isolated; no Supabase migration or Netlify deployment was performed.
+
+## 0.7 — Host console workflow order (2026-09-27)
+
+- Moved the recording timeline below the three-part TV preview and public-prompt workspace so the host first sees what the room sees, then operates the show, then manages the queue.
+- Replaced the collapsed `More Timeline Tools` drawer with an always-visible command deck organized as `1 · Recording`, `2 · Live set`, `3 · Mark a moment`, and `4 · Mark room time`.
+- Kept optional filename/note inputs and recovery/export/delete utilities visible but structurally secondary to the frequent show controls.
+- Compressed the desktop preview and timeline matrices so the `Up Next` and event-total regions remain present in the no-page-scroll host workspace.
+- Verification: 21 automated tests passed, the production Vite build completed with 114 modules, and a 1524×1252 mock-isolated render retained the three preview regions, the complete command deck, and the queue boundary below it. No production data or deployment changed.

@@ -885,8 +885,6 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
           </>
         )}
       />
-      {productionControls}
-
       {error && <div className="error-message">{error}</div>}
 
       <section className="host-tv-preview-panel" aria-labelledby="host-tv-preview-title">
@@ -1030,6 +1028,8 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
         </div>
         <small>Constrained prompts above remain draft-only. Public announcements and supporter acknowledgements use the guarded workflow.</small>
       </section>
+
+      {productionControls}
 
       {quickSignupOpen && (
         <section id="host-quick-signup-panel" className="host-quick-signup-panel" aria-label="Quick performer signup">
