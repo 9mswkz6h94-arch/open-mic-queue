@@ -21,6 +21,8 @@ The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/V
 
 ## Completed
 
+0.2. Extended Spotlight from the venue display to the entire application through `src/themes/spotlight.css`, loaded after Scaffold so structure remains authoritative. Public queue, signup, artist entry, account access, Host Console, queue states, forms, messages, and timeline surfaces now share the accepted local fonts, room palette, purpose-color mapping, square/2px geometry, explicit focus, and non-color state edges. Local mock-isolated rendered review covered the public queue, signup, artist-entry empty state, and Host Console. Production remains undeployed.
+
 0.1. Jonathan explicitly authorized the Spotlight identity pass after the September live-event field report. The venue display now uses the accepted Spotlight Focus expression, locally bundled Instrument Sans/Serif and Space Mono, the canonical room palette, one bounded orange-yellow performer reveal, an unobstructed known subject, a serif witness line, and a violet labeled Up Next edge. Structural TV collision repairs remain intact. This does not authorize production deployment.
 
 0. On the isolated `feat/reaper-timeline` branch, added an event-scoped, append-only recording timeline, host recording/marker/gap controls, privacy-limited JSON/CSV/REAPER exports, deterministic mock persistence, a synthetic Nelson's fixture, and migration/rollback files. No production migration or deployment was performed. See `docs/REAPER_TIMELINE_ARCHITECTURE.md`.
@@ -117,4 +119,4 @@ The uncommitted strategy and validation documents belong to existing work and mu
 
 ## One next action
 
-Review the Spotlight venue display at 1366×668 on the actual television, then make dead-space, MC-talk, and host-note controls more conspicuous without changing production data.
+Complete responsive and workflow review of Spotlight across phone, tablet, desktop, 200% zoom, and reduced motion; then make dead-space, MC-talk, and host-note controls more conspicuous without changing production data.

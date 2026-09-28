@@ -8,9 +8,11 @@
   "targetIdentity": "spotlight",
   "currentPhase": "identity-application",
   "surfaces": {
-    "publicQueue": "scaffold",
-    "performerSignup": "scaffold",
-    "hostConsole": "scaffold",
+    "publicQueue": "spotlight",
+    "performerSignup": "spotlight",
+    "artistEntry": "spotlight",
+    "accountAccess": "spotlight",
+    "hostConsole": "spotlight",
     "futureVenueIdentity": "spotlight",
     "venueDisplay": "spotlight"
   },
@@ -41,5 +43,5 @@
   ],
   "handoff": "DESIGN_HANDOFF.md",
   "scaffoldStylesheet": "src/themes/scaffold.css",
-  "nextAction": "Review the Spotlight venue display at 1366×668, then make dead-space, MC-talk, and host-note controls more conspicuous"
+  "nextAction": "Complete responsive and workflow review of Spotlight across public queue, signup, artist entry, account access, Host Console, and venue display"
 }

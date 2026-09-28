@@ -6,6 +6,7 @@ import '@ibm/plex-sans-condensed/css/ibm-plex-sans-condensed-default.css'
 import '@ibm/plex-mono/css/ibm-plex-mono-default.css'
 import './index.css'
 import './themes/scaffold.css'
+import './themes/spotlight.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

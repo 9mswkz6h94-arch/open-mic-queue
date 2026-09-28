@@ -1,0 +1,423 @@
+/*
+ * SPOTLIGHT — The Unknown, Made Known
+ * Identity layer for Open Mic Queue. Scaffold remains the structural base.
+ */
+
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../assets/fonts/spotlight/instrument-sans/InstrumentSans-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("../assets/fonts/spotlight/instrument-serif/InstrumentSerif-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("../assets/fonts/spotlight/instrument-serif/InstrumentSerif-Italic.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Mono";
+  src: url("../assets/fonts/spotlight/space-mono/SpaceMono-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Mono";
+  src: url("../assets/fonts/spotlight/space-mono/SpaceMono-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --spotlight-canvas: #120f10;
+  --spotlight-surface: #1b1718;
+  --spotlight-raised: #241e20;
+  --spotlight-text: #ffffff;
+  --spotlight-muted: #d3d2d2;
+  --spotlight-border: #928f90;
+  --spotlight-border-quiet: #5b5658;
+  --spotlight-live: #ff904e;
+  --spotlight-reveal-core: #ffde59;
+  --spotlight-focus: #00baff;
+  --spotlight-on-deck: #8b51fe;
+  --spotlight-complete: #60e027;
+  --spotlight-danger: #ff1717;
+
+  --scaffold-canvas: var(--spotlight-canvas);
+  --scaffold-surface: var(--spotlight-surface);
+  --scaffold-surface-raised: var(--spotlight-raised);
+  --scaffold-paper: var(--spotlight-surface);
+  --scaffold-ink: var(--spotlight-text);
+  --scaffold-muted: var(--spotlight-muted);
+  --scaffold-line: var(--spotlight-border-quiet);
+  --scaffold-line-strong: var(--spotlight-border);
+  --scaffold-soft: var(--spotlight-raised);
+  --scaffold-danger: var(--spotlight-danger);
+  --scaffold-success: var(--spotlight-complete);
+  --scaffold-warning: var(--spotlight-live);
+  --scaffold-focus: var(--spotlight-focus);
+  --scaffold-font-interface: "Instrument Sans", Arial, Helvetica, sans-serif;
+  --scaffold-font-display: "Instrument Sans", Arial, Helvetica, sans-serif;
+  --scaffold-font-measurement: "Space Mono", Consolas, "Liberation Mono", monospace;
+  --scaffold-radius: 2px;
+  --primary: var(--spotlight-live);
+  --primary-dark: var(--spotlight-reveal-core);
+  --text: var(--spotlight-text);
+  --text-muted: var(--spotlight-muted);
+  --bg-subtle: var(--spotlight-raised);
+  --border: var(--spotlight-border-quiet);
+  --success: var(--spotlight-complete);
+  --error: var(--spotlight-danger);
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--spotlight-canvas);
+  color: var(--spotlight-text);
+}
+
+body,
+body *,
+button,
+input,
+textarea,
+select {
+  font-family: var(--scaffold-font-interface);
+}
+
+h1,
+h2,
+h3,
+h4,
+.navbar-title,
+.btn,
+.status-label,
+.position,
+.position-badge,
+.queue-position,
+.section-index,
+.section-count {
+  font-family: var(--scaffold-font-display);
+}
+
+.eyebrow,
+.navbar-context,
+.story-label,
+.timestamp-display,
+.real-name-small,
+.songs-small,
+.text-action,
+.development-tools summary {
+  font-family: var(--scaffold-font-measurement);
+}
+
+.navbar {
+  border-bottom-color: var(--spotlight-border);
+  background: var(--spotlight-surface);
+}
+
+.navbar-home,
+.btn-secondary,
+.btn-nav,
+.btn-outline,
+.btn-logout {
+  color: var(--spotlight-text);
+}
+
+.btn {
+  border-color: var(--spotlight-border);
+  border-radius: 2px;
+  background: var(--spotlight-surface);
+  color: var(--spotlight-text);
+}
+
+.btn:hover {
+  border-color: var(--spotlight-live);
+  background: var(--spotlight-live);
+  color: var(--spotlight-canvas);
+}
+
+.btn-primary,
+.btn-primary:hover,
+.btn-nav[aria-current="page"] {
+  border-color: var(--spotlight-live);
+  background: var(--spotlight-live);
+  color: var(--spotlight-canvas);
+}
+
+.btn:focus-visible,
+.navbar-home:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.text-action:focus-visible,
+.drag-handle:focus-visible {
+  outline: 3px solid var(--spotlight-focus);
+  outline-offset: 3px;
+}
+
+.environment-banner {
+  border-color: var(--spotlight-border);
+  background: var(--spotlight-raised);
+  color: var(--spotlight-text);
+}
+
+.environment-banner::before {
+  background: var(--spotlight-focus);
+}
+
+.environment-banner-production {
+  border-color: var(--spotlight-danger);
+  color: var(--spotlight-danger);
+}
+
+.environment-banner span,
+.environment-banner code,
+.environment-banner select {
+  border-color: var(--spotlight-border);
+  background: var(--spotlight-surface);
+  color: var(--spotlight-text);
+}
+
+.hero,
+.admin-page > div:first-child {
+  border-top: 5px solid var(--spotlight-live);
+  border-bottom-color: var(--spotlight-border);
+}
+
+.hero p:not(.eyebrow) {
+  border-left: 2px solid var(--spotlight-live);
+  color: var(--spotlight-muted);
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.current-performer,
+.on-deck,
+.queue-list,
+.already-performed,
+.performer-card,
+.on-deck-card,
+.queue-row,
+.completed-performer,
+.admin-login-card,
+.auth-form,
+.signup-form,
+.queue-progress,
+.queue-list-admin,
+.queue-list-completed,
+.admin-info,
+.queue-state {
+  border-color: var(--spotlight-border);
+  border-radius: 0;
+  background: var(--spotlight-surface);
+  color: var(--spotlight-text);
+}
+
+.current-performer,
+.performer-card.current,
+.performer-card.current-large {
+  background:
+    radial-gradient(ellipse at 16% 45%, rgba(255, 222, 89, 0.2) 0, rgba(255, 144, 78, 0.12) 30%, rgba(255, 144, 78, 0) 68%),
+    var(--spotlight-surface);
+}
+
+.performer-card.current::before,
+.performer-card.current-large::before {
+  width: 5px;
+  background: var(--spotlight-live);
+}
+
+.performer-card.current h3,
+.performer-card.current-large h3,
+.on-deck-card h4,
+.on-deck-card .real-name,
+.on-deck-card .on-deck-songs,
+.on-deck-card .on-deck-songs p,
+.completed-performer .artist-name,
+.completed-header .check-mark,
+.completed-item .check-mark {
+  color: var(--spotlight-text);
+}
+
+.performer-story,
+.on-deck-story,
+.artist-story {
+  border-color: var(--spotlight-border-quiet);
+  color: var(--spotlight-muted);
+  font-family: "Instrument Serif", Georgia, serif;
+  font-style: italic;
+}
+
+.on-deck-card {
+  border-width: 1px 1px 1px 5px;
+  border-left-color: var(--spotlight-on-deck);
+}
+
+.position-badge {
+  border-color: var(--spotlight-on-deck);
+  background: var(--spotlight-raised);
+  color: var(--spotlight-text);
+}
+
+.queue-row {
+  border-left-color: var(--spotlight-border);
+}
+
+.queue-row .position {
+  border-color: var(--spotlight-text);
+  background: var(--spotlight-text);
+  color: var(--spotlight-canvas);
+}
+
+.completed-performer,
+.completed-item {
+  border-left-color: var(--spotlight-complete);
+}
+
+.social-links a,
+.on-deck-card .social-links a,
+.completed-performer .social-links a,
+.text-action {
+  color: var(--spotlight-text);
+  filter: none;
+}
+
+.social-links a:hover,
+.text-action:hover {
+  color: var(--spotlight-live);
+}
+
+.signup-form,
+.auth-form,
+.admin-login-card {
+  border-top: 5px solid var(--spotlight-live);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select,
+.checkboxes label {
+  border-color: var(--spotlight-border);
+  border-radius: 2px;
+  background: var(--spotlight-raised);
+  color: var(--spotlight-text);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--spotlight-focus);
+}
+
+.error-message {
+  border-left: 5px solid var(--spotlight-danger);
+  border-color: var(--spotlight-danger);
+  background: var(--spotlight-surface);
+  color: var(--spotlight-danger);
+}
+
+.success-message {
+  border-left: 5px solid var(--spotlight-complete);
+  border-color: var(--spotlight-complete);
+  background: var(--spotlight-surface);
+  color: var(--spotlight-complete);
+}
+
+.loading {
+  border-top: 5px solid var(--spotlight-live);
+  border-bottom-color: var(--spotlight-border);
+  color: var(--spotlight-text);
+}
+
+.queue-item,
+.completed-item,
+.run-show-v2,
+.run-show-row,
+.run-show-song,
+.run-show-history-row {
+  border-color: var(--spotlight-border-quiet);
+  background: var(--spotlight-surface);
+  color: var(--spotlight-text);
+}
+
+.run-show-v2,
+.run-show-strip,
+.run-show-queue,
+.run-show-detail-heading,
+.run-show-footer,
+.run-show-drawer,
+.run-show-drawer-heading,
+.run-show-tv-drawer iframe {
+  border-color: var(--spotlight-border);
+}
+
+.run-show-state:first-child {
+  border-left: 5px solid var(--spotlight-live);
+}
+
+.run-show-row.is-selected {
+  outline-color: var(--spotlight-focus);
+}
+
+.run-show-song.is-current {
+  border-color: var(--spotlight-live);
+  background: var(--spotlight-live);
+  color: var(--spotlight-canvas);
+}
+
+.run-show-detail,
+.run-show-drawer {
+  background: var(--spotlight-raised);
+  color: var(--spotlight-text);
+}
+
+.drag-handle {
+  border-color: var(--spotlight-border);
+  color: var(--spotlight-muted);
+}
+
+.admin-info p {
+  border-left-color: var(--spotlight-focus);
+  color: var(--spotlight-text);
+}
+
+.performer-avatar,
+.auth-form img,
+.signup-form img,
+.performer-card.current-large img {
+  border-color: var(--spotlight-live) !important;
+  filter: none;
+}
+
+::selection {
+  background: var(--spotlight-reveal-core);
+  color: var(--spotlight-canvas);
+}
+
+@media (forced-colors: active) {
+  .current-performer,
+  .performer-card.current,
+  .performer-card.current-large {
+    background: Canvas;
+  }
+}
+

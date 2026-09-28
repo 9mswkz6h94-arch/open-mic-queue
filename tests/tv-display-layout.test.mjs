@@ -4,6 +4,8 @@ import test from 'node:test'
 
 const displaySource = await readFile(new URL('../src/pages/TVDisplay.jsx', import.meta.url), 'utf8')
 const displayStyles = await readFile(new URL('../src/pages/TVDisplay.css', import.meta.url), 'utf8')
+const appEntry = await readFile(new URL('../src/index.jsx', import.meta.url), 'utf8')
+const spotlightStyles = await readFile(new URL('../src/themes/spotlight.css', import.meta.url), 'utf8')
 
 test('venue display keeps calibration controls out of the live header', () => {
   const liveHeader = displaySource.match(/<header className="tv-header">([\s\S]*?)<\/header>/)?.[1] || ''
@@ -31,4 +33,21 @@ test('venue display applies the accepted Spotlight focus identity', () => {
   assert.match(displayStyles, /--spotlight-live:#ff904e;/)
   assert.match(displayStyles, /--spotlight-on-deck:#8b51fe;/)
   assert.match(displayStyles, /\.tv-performer-content::before \{[^}]*radial-gradient/)
+})
+
+test('the full application loads the Spotlight identity after Scaffold', () => {
+  assert.match(appEntry, /import '\.\/themes\/scaffold\.css'[\s\S]*import '\.\/themes\/spotlight\.css'/)
+  assert.match(spotlightStyles, /--spotlight-canvas: #120f10;/)
+  assert.match(spotlightStyles, /--spotlight-live: #ff904e;/)
+  assert.match(spotlightStyles, /--spotlight-focus: #00baff;/)
+  assert.match(spotlightStyles, /--spotlight-on-deck: #8b51fe;/)
+  assert.match(spotlightStyles, /--spotlight-complete: #60e027;/)
+  assert.match(spotlightStyles, /--spotlight-danger: #ff1717;/)
+})
+
+test('Spotlight keeps structural state cues alongside purpose color', () => {
+  assert.match(spotlightStyles, /\.on-deck-card \{[^}]*border-left-color: var\(--spotlight-on-deck\);/)
+  assert.match(spotlightStyles, /\.completed-performer,[\s\S]*\.completed-item \{[^}]*border-left-color: var\(--spotlight-complete\);/)
+  assert.match(spotlightStyles, /\.error-message \{[^}]*border-left: 5px solid var\(--spotlight-danger\);/)
+  assert.match(spotlightStyles, /outline: 3px solid var\(--spotlight-focus\);/)
 })
