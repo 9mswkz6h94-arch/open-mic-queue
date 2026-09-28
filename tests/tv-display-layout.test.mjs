@@ -17,6 +17,7 @@ test('venue display keeps calibration controls out of the live header', () => {
 
 test('venue display protects the title and upcoming performers from wrapping', () => {
   assert.match(displayStyles, /\.tv-header h1 \{[^}]*white-space:nowrap;/)
+  assert.doesNotMatch(displayStyles, /\.tv-header h1 \{[^}]*text-overflow:ellipsis;/)
   assert.match(displayStyles, /\.tv-ticker-window \{[^}]*white-space:nowrap;/)
   assert.doesNotMatch(displayStyles, /prefers-reduced-motion:reduce[^}]*flex-wrap:wrap;/)
 })
