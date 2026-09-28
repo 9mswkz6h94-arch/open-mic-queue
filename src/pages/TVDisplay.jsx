@@ -9,7 +9,6 @@ import './TVDisplay.css'
 
 const PUBLIC_APP_URL = import.meta.env.VITE_PUBLIC_APP_URL || 'https://open-mic-queue.netlify.app'
 const EVENT_NAME = import.meta.env.VITE_EVENT_NAME || 'Brother Jons Song Writer Open Mic'
-const VENUE_NAME = import.meta.env.VITE_VENUE_NAME || 'Presented by Rainbow Heart Studio'
 const SUPPORT_LINKS = [
   { label: 'Cash App', handle: '$rainbowheartstudio', url: 'https://cash.app/$rainbowheartstudio' },
   { label: 'Venmo', handle: '@rainbowheartstudio', url: 'https://venmo.com/rainbowheartstudio' },
@@ -154,7 +153,6 @@ export default function TVDisplay({ eventSlug }) {
         <div className="tv-title-lockup"><p className="tv-kicker">Rainbow Heart Studio presents</p><h1>{EVENT_NAME}</h1></div>
         <div className="tv-event-meta">
           <span>Live tonight</span>
-          <strong>{VENUE_NAME}</strong>
           <button type="button" className="tv-fullscreen-button" onClick={toggleFullscreen}>
             {isFullscreen ? 'Exit full screen' : 'Full screen'}
           </button>
