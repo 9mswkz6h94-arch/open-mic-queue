@@ -148,7 +148,15 @@ export default function TVDisplay({ eventSlug }) {
   const activePerformers = useMemo(() => performers.filter(performer => !performer.attended), [performers])
   const currentPerformer = activePerformers.find(performer => performer.current)
   const upcomingPerformers = activePerformers.filter(performer => !performer.current)
-  const tickerItems = upcomingPerformers.length > 1 ? [...upcomingPerformers, ...upcomingPerformers] : upcomingPerformers
+  const completedPerformers = performers.filter(performer => performer.attended)
+  const tickerSegments = [
+    currentPerformer && { label: 'On stage', value: currentPerformer.stage_name, tone: 'live' },
+    upcomingPerformers[0] && { label: 'On deck', value: upcomingPerformers[0].stage_name, tone: 'on-deck' },
+    upcomingPerformers.length > 1 && { label: 'Coming up', value: upcomingPerformers.slice(1).map(performer => performer.stage_name).join(' · '), tone: 'queue' },
+    completedPerformers.length > 0 && { label: 'Already performed', value: completedPerformers.map(performer => performer.stage_name).join(' · '), tone: 'complete' },
+    publishedPrompt?.region === 'ticker' && { label: publishedPrompt.label || 'Message', value: publishedPrompt.content, tone: 'message' },
+  ].filter(Boolean)
+  const tickerItems = tickerSegments.length > 1 ? [...tickerSegments, ...tickerSegments] : tickerSegments
   const currentSongs = getSongTitles(currentPerformer)
   const visibleSongLimit = displaySize === 'extra-large' ? 3 : displaySize === 'large' ? 4 : 5
   const visibleCurrentSongs = currentSongs.slice(0, visibleSongLimit)
@@ -228,12 +236,12 @@ export default function TVDisplay({ eventSlug }) {
         </aside>
       </main>
 
-      <footer className={`tv-ticker${publishedPrompt?.region === 'ticker' ? ' has-published-prompt' : ''}`} aria-label={publishedPrompt?.region === 'ticker' ? 'Public announcement' : 'Upcoming performers'}>
-        <div className="tv-ticker-label">{publishedPrompt?.region === 'ticker' ? 'Announcement' : 'Up next'}</div>
+      <footer className={`tv-ticker${publishedPrompt?.region === 'ticker' ? ' has-published-prompt' : ''}`} aria-label="Live show status">
+        <div className="tv-ticker-label">Show status</div>
         <div className="tv-ticker-window">
-          {publishedPrompt?.region === 'ticker'
-            ? <div className="tv-prompt-ticker-copy" aria-live="polite">{publishedPrompt.content}</div>
-            : tickerItems.length ? <div className={`tv-ticker-track ${upcomingPerformers.length > 1 ? 'is-scrolling' : ''}`}>{tickerItems.map((performer, index) => <span key={`${performer.id}-${index}`}>{performer.stage_name}<i aria-hidden="true">◆</i></span>)}</div> : <div className="tv-ticker-empty">Sign up from the phone queue to join tonight’s lineup.</div>}
+          {tickerItems.length
+            ? <div className={`tv-ticker-track ${tickerSegments.length > 1 ? 'is-scrolling' : ''}`}>{tickerItems.map((segment, index) => <span className={`tv-ticker-segment is-${segment.tone}`} key={`${segment.label}-${index}`}><b>{segment.label}</b>{segment.value}<i aria-hidden="true">◆</i></span>)}</div>
+            : <div className="tv-ticker-empty">Sign up from the phone queue to join tonight’s lineup.</div>}
         </div>
       </footer></>}
     </div>

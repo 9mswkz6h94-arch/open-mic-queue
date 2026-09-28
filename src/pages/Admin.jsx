@@ -1002,10 +1002,6 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
               Confirm the supporter approved this exact public display name and message.
             </label>
           )}
-          <div className="host-public-prompt-actions">
-            <button type="button" className="btn btn-outline btn-small" onClick={draftPublicPrompt}>Create draft</button>
-            <button type="button" className="btn btn-outline btn-small" disabled={publicPromptState?.status !== 'draft'} onClick={previewPublicPrompt}>Preview placement</button>
-          </div>
           {publicPromptState && (
             <div className={`host-public-prompt-state is-${publicPromptState.status}`} role="status" aria-live="polite">
               <strong>{publicPromptState.label} · {publicPromptState.status}</strong>
@@ -1020,6 +1016,8 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
             </div>
           )}
           <div className="host-public-prompt-actions">
+            <button type="button" className="btn btn-outline btn-small" onClick={draftPublicPrompt}>Create draft</button>
+            <button type="button" className="btn btn-outline btn-small" disabled={publicPromptState?.status !== 'draft'} onClick={previewPublicPrompt}>Preview placement</button>
             <button type="button" className="btn btn-primary btn-small" disabled={publicPromptState?.status !== 'previewed' || !publishConfirmed} onClick={publishPublicPrompt}>Publish to {isMockDisplayPromptChannel() ? 'mock TV' : 'live TV'}</button>
             <button type="button" className="btn btn-outline btn-small" disabled={publicPromptState?.status !== 'published'} onClick={() => endPublicPrompt('expired')}>Expire now</button>
             <button type="button" className="btn btn-delete btn-small" disabled={!publicPromptState || ['cleared', 'expired'].includes(publicPromptState.status)} onClick={() => endPublicPrompt('cleared')}>Clear</button>
@@ -1045,11 +1043,18 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
         </section>
       )}
 
-      <div className="host-command-grid">
+      <div className={`host-command-grid${completedPerformers.length ? ' has-history' : ''}`}>
         <section className="host-command-queue" aria-label="Upcoming performer queue">
       {/* Drag-and-drop Queue */}
       <div className="queue-list-admin">
-        <h3>Up next <span className="section-count">{String(upcomingPerformers.length).padStart(2, '0')}</span></h3>
+        <div className="host-queue-heading">
+          <h3>Up next <span className="section-count">{String(upcomingPerformers.length).padStart(2, '0')}</span></h3>
+          <div className="host-queue-summary" aria-label="Event queue totals">
+            <span><strong>{performers.length}</strong> signed up</span>
+            <span><strong>{upcomingPerformers.length}</strong> waiting</span>
+            <span><strong>{completedPerformers.length}</strong> performed</span>
+          </div>
+        </div>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
           Drag the Move handle to reorder. On a touchscreen, press and hold the handle, then drag.
           {isReordering && <strong role="status"> Saving order…</strong>}
@@ -1085,7 +1090,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       </div>
         </section>
 
-        <section className="host-command-history" aria-label="Completed performers and event totals">
+        {completedPerformers.length > 0 && <section className="host-command-history" aria-label="Completed performers">
       {/* Completed */}
       {completedPerformers.length > 0 && (
         <div className="queue-list-completed">
@@ -1121,12 +1126,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
         </div>
       )}
 
-      <div className="admin-info">
-        <p>Total in queue: {performers.length}</p>
-        <p>Still to go: {upcomingPerformers.length}</p>
-        <p>Performed: {completedPerformers.length}</p>
-      </div>
-        </section>
+        </section>}
       </div>
 
       <details className="development-tools">

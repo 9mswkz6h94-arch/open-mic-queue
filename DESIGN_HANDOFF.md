@@ -147,3 +147,11 @@ Complete responsive and workflow review of Spotlight across phone, tablet, deskt
 - Kept optional filename/note inputs and recovery/export/delete utilities visible but structurally secondary to the frequent show controls.
 - Compressed the desktop preview and timeline matrices so the `Up Next` and event-total regions remain present in the no-page-scroll host workspace.
 - Verification: 21 automated tests passed, the production Vite build completed with 114 modules, and a 1524×1252 mock-isolated render retained the three preview regions, the complete command deck, and the queue boundary below it. No production data or deployment changed.
+
+## 0.8 — Compact host button board and show-status ticker (2026-09-27)
+
+- Rebuilt the timeline as a compact host button board: one status strip for recording, on-stage identity, active song, marker note, optional filename, and recording state; two rows of full-size show controls beneath it.
+- Removed the empty event-totals column. Signed-up, waiting, and performed counts now sit in the `Up Next` header, and the queue takes the full lower workspace until performed history actually exists.
+- Repacked the TV prompt vocabulary and guarded publish workflow so their complete controls remain visible in the fixed desktop preview region.
+- Expanded the venue ticker from a names-only marquee into a repeating show-status sequence: `On stage`, `On deck`, `Coming up`, `Already performed`, then any published ticker message.
+- Verification: 22 automated tests passed, the production Vite build completed with 114 modules, and rendered mock-isolated review covered the 1524×1252 Host Console plus a 1524×857 venue display. No production data, migrations, or deployment changed.
