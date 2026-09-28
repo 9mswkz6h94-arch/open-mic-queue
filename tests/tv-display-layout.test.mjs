@@ -8,6 +8,8 @@ const appEntry = await readFile(new URL('../src/index.jsx', import.meta.url), 'u
 const spotlightStyles = await readFile(new URL('../src/themes/spotlight.css', import.meta.url), 'utf8')
 const fixtureSource = await readFile(new URL('../src/lib/mockFixtures.js', import.meta.url), 'utf8')
 const environmentBannerSource = await readFile(new URL('../src/components/EnvironmentBanner.jsx', import.meta.url), 'utf8')
+const adminSource = await readFile(new URL('../src/pages/Admin.jsx', import.meta.url), 'utf8')
+const appStyles = await readFile(new URL('../src/App.css', import.meta.url), 'utf8')
 
 test('venue display keeps calibration controls out of the live header', () => {
   const liveHeader = displaySource.match(/<header className="tv-header">([\s\S]*?)<\/header>/)?.[1] || ''
@@ -75,4 +77,10 @@ test('tonight show demo uses public presentation data and placeholder contact ad
   assert.ok(emails.length > 0)
   assert.ok(emails.every((email) => email.endsWith('@example.test')))
   assert.match(environmentBannerSource, /'tonight-show'/)
+})
+
+test('desktop host queue separates performer details from its action grid', () => {
+  assert.match(adminSource, /performer\.real_name !== performer\.stage_name/)
+  assert.match(appStyles, /\.host-command-queue \.queue-actions \{[\s\S]*?grid-column: 1 \/ -1;/)
+  assert.match(appStyles, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/)
 })

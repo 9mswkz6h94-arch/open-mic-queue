@@ -59,7 +59,7 @@ function SortableRow({ performer, idx, onMarkCurrent, onMarkPerformed, onDelete,
         <div className="performer-info">
           <strong>{performer.stage_name}</strong>
           {performer.entry_role === 'featured_artist' && <span className="featured-artist-badge">Featured Artist</span>}
-          <small>{performer.real_name}</small>
+          {performer.real_name && performer.real_name !== performer.stage_name && <small>{performer.real_name}</small>}
         </div>
         <div className="songs-small">
           {getSongTitles(performer).join(' / ')}
@@ -107,6 +107,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
   const [timelineCues, setTimelineCues] = useState([])
   const [timelineStatus, setTimelineStatus] = useState('synced')
   const [openGap, setOpenGap] = useState(null)
+  const [doNotPublishOpen, setDoNotPublishOpen] = useState(false)
   const [tvPromptDraft, setTvPromptDraft] = useState(null)
   const [publicPromptType, setPublicPromptType] = useState('announcement')
   const [publicPromptMessage, setPublicPromptMessage] = useState('')
@@ -145,6 +146,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       setTimelineStatus(timeline.pendingCount ? 'pending' : timeline.replayErrors?.length ? 'error' : 'synced')
       const derived = deriveTimelineState(timeline.cues)
       setOpenGap(derived.openGap)
+      setDoNotPublishOpen(derived.doNotPublishOpen)
       if (derived.activeSong) setCurrentSongByPerformer(previous => ({ ...previous, [derived.activeSong.entryId]: derived.activeSong.position - 1 }))
     } catch (timelineError) {
       setTimelineStatus('error')
@@ -192,6 +194,17 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
     await saveTimelineCue({ cueType, note, isEditMarker: true, publicationStatus })
   }
 
+  async function toggleDoNotPublish(note) {
+    const nextOpen = !doNotPublishOpen
+    await saveTimelineCue({
+      cueType: nextOpen ? 'do_not_publish_started' : 'do_not_publish_ended',
+      note,
+      isEditMarker: true,
+      publicationStatus: 'do_not_publish',
+    })
+    setDoNotPublishOpen(nextOpen)
+  }
+
   async function toggleTimelineGap(type, note) {
     if (!isMockMode) {
       setTimelineStatus('saving')
@@ -233,6 +246,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       setError('')
       const currentPerformer = performers.find(p => p.current)
       const nextPerformer = performers.find(p => p.id === performerId)
+      let transitionCueIds = []
       const snapshots = [currentPerformer, nextPerformer]
         .filter(Boolean)
         .filter((performer, index, list) => list.findIndex(item => item.id === performer.id) === index)
@@ -240,8 +254,11 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
 
       if (!isMockMode) {
         setTimelineStatus('saving')
-        const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'performer_start', entryId: performerId, cueIds: { performer_ended: crypto.randomUUID(), performer_started: crypto.randomUUID() } })
+        const cueIds = { gap_ended: crypto.randomUUID(), song_ended: crypto.randomUUID(), performer_ended: crypto.randomUUID(), performer_started: crypto.randomUUID() }
+        transitionCueIds = Object.values(cueIds)
+        const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'performer_start', entryId: performerId, cueIds })
         if (result.cues?.length) setTimelineCues(previous => [...previous, ...result.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
+        if (result.pending_sync) setPerformers(previous => previous.map(performer => ({ ...performer, current: performer.id === performerId, attended: performer.id === performerId ? false : performer.current ? true : performer.attended })))
         setTimelineStatus(result.pending_sync ? 'pending' : 'synced')
       } else {
       if (currentPerformer && currentPerformer.id !== performerId) {
@@ -261,7 +278,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       await saveTimelineCue({ cueType: 'performer_started', entryId: performerId, performerLabel: nextPerformer?.stage_name || null })
       }
 
-      setStageUndo({ label: `starting ${nextPerformer?.stage_name || 'performer'}`, snapshots })
+      setStageUndo({ label: `starting ${nextPerformer?.stage_name || 'performer'}`, snapshots, cueIds: transitionCueIds })
       await fetchPerformers()
     } catch (err) {
       setError(err.message)
@@ -272,14 +289,18 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
     try {
       setError('')
       const nextPerformer = performers.find(p => !p.attended && !p.current && p.id !== performerId)
+      let transitionCueIds = []
       const snapshots = [performers.find(p => p.id === performerId), nextPerformer]
         .filter(Boolean)
         .map(stageSnapshot)
 
       if (!isMockMode) {
         setTimelineStatus('saving')
-        const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'performer_advance', entryId: performerId, nextEntryId: nextPerformer?.id, cueIds: { song_ended: crypto.randomUUID(), performer_ended: crypto.randomUUID(), performer_started: crypto.randomUUID() } })
+        const cueIds = { gap_ended: crypto.randomUUID(), song_ended: crypto.randomUUID(), performer_ended: crypto.randomUUID(), performer_started: crypto.randomUUID() }
+        transitionCueIds = Object.values(cueIds)
+        const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'performer_advance', entryId: performerId, nextEntryId: nextPerformer?.id, cueIds })
         if (result.cues?.length) setTimelineCues(previous => [...previous, ...result.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
+        if (result.pending_sync) setPerformers(previous => previous.map(performer => performer.id === performerId ? { ...performer, current: false, attended: true } : performer.id === nextPerformer?.id ? { ...performer, current: true, attended: false } : performer))
         setTimelineStatus(result.pending_sync ? 'pending' : 'synced')
       } else {
       const { error: completeError } = await supabase
@@ -306,7 +327,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       }
       }
 
-      setStageUndo({ label: `advancing past ${snapshots[0]?.stage_name || 'performer'}`, snapshots })
+      setStageUndo({ label: `advancing past ${snapshots[0]?.stage_name || 'performer'}`, snapshots, cueIds: transitionCueIds })
       await fetchPerformers()
     } catch (err) {
       setError(err.message)
@@ -331,12 +352,12 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
     try {
       setError('')
       if (!isMockMode) {
-        const lastCue = timelineCues.at(-1)
-        if (lastCue) {
-          const saved = await undoShowTransition({ eventId: event.id, clientCueId: crypto.randomUUID(), correctsCueId: lastCue.id, snapshots: stageUndo.snapshots, note: `Host undo: ${stageUndo.label}` })
-          if (saved?.client_cue_id) setTimelineCues(previous => [...previous, saved])
-          setTimelineStatus(saved?.pending_sync ? 'pending' : 'synced')
-        }
+        setTimelineStatus('saving')
+        const corrections = (stageUndo.cueIds || []).map(correctsCueId => ({ client_cue_id: crypto.randomUUID(), corrects_cue_id: correctsCueId }))
+        const saved = await undoShowTransition({ eventId: event.id, corrections, snapshots: stageUndo.snapshots, note: `Host undo: ${stageUndo.label}` })
+        if (saved.cues?.length) setTimelineCues(previous => [...previous, ...saved.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
+        if (saved.pending_sync) setPerformers(previous => previous.map(performer => stageUndo.snapshots.find(snapshot => snapshot.id === performer.id) || performer))
+        setTimelineStatus(saved.pending_sync ? 'pending' : 'synced')
       } else {
       for (const snapshot of stageUndo.snapshots) {
         const { id, stage_name: _stageName, ...restoredState } = snapshot
@@ -519,7 +540,7 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
 
     if (!isMockMode) {
       setTimelineStatus('saving')
-      const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'song_start', entryId: performer.id, songPosition: safeIndex + 1, songLabel: songs[safeIndex], cueIds: { song_ended: crypto.randomUUID(), song_started: crypto.randomUUID() } })
+      const result = await applyShowTransition({ eventId: event.id, recordingSessionId: activeRecording?.id, transition: 'song_start', entryId: performer.id, songPosition: safeIndex + 1, songLabel: songs[safeIndex], cueIds: { gap_ended: crypto.randomUUID(), song_ended: crypto.randomUUID(), song_started: crypto.randomUUID() } })
       if (result.cues?.length) setTimelineCues(previous => [...previous, ...result.cues.filter(cue => !previous.some(item => item.client_cue_id === cue.client_cue_id))])
       setTimelineStatus(result.pending_sync ? 'pending' : 'synced')
     } else {
@@ -769,9 +790,11 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       status={timelineStatus}
       cueCount={timelineCues.length}
       openGap={openGap}
+      doNotPublishOpen={doNotPublishOpen}
       onStartRecording={startTimelineRecording}
       onStopRecording={stopTimelineRecording}
       onMarker={addTimelineMarker}
+      onDoNotPublish={toggleDoNotPublish}
       onGap={toggleTimelineGap}
       onResync={(note) => addTimelineMarker('recording_resynced', note)}
       onExport={exportTimestamps}

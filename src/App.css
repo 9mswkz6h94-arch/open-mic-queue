@@ -490,6 +490,48 @@
     padding: var(--scaffold-space-3);
   }
 
+  .host-command-queue .queue-item {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: start;
+    row-gap: var(--scaffold-space-3);
+    padding: var(--scaffold-space-4);
+  }
+
+  .host-command-queue .queue-info {
+    display: grid;
+    gap: var(--scaffold-space-2);
+    min-width: 0;
+  }
+
+  .host-command-queue .performer-info {
+    margin: 0;
+  }
+
+  .host-command-queue .performer-info strong {
+    font-size: var(--scaffold-text-body);
+    line-height: 1.2;
+  }
+
+  .host-command-queue .songs-small {
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .host-command-queue .queue-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: stretch;
+    padding-top: var(--scaffold-space-3);
+    border-top: 1px solid var(--scaffold-line);
+  }
+
+  .host-command-queue .queue-actions .btn {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+
   .host-quick-signup-panel {
     position: fixed;
     z-index: 20;
