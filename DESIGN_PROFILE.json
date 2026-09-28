@@ -1,17 +1,18 @@
 {
   "$schema": "../rainbowheart-os/schemas/app-profile.schema.json",
   "schemaVersion": 1,
-  "designSystemVersion": "0.1.3",
+  "designSystemVersion": "0.8.0",
   "app": "open-mic-queue",
   "projectId": "proj-002",
   "foundation": "scaffold",
-  "targetIdentity": "prism",
-  "currentPhase": "scaffold-review",
+  "targetIdentity": "spotlight",
+  "currentPhase": "identity-application",
   "surfaces": {
     "publicQueue": "scaffold",
     "performerSignup": "scaffold",
     "hostConsole": "scaffold",
-    "futureVenueIdentity": "prism"
+    "futureVenueIdentity": "spotlight",
+    "venueDisplay": "spotlight"
   },
   "reviewSafety": {
     "dataMode": "mock-isolated",
@@ -36,9 +37,9 @@
     "productionSecrets",
     "themeChangesToAuthorization",
     "productionDataMutationDuringDesignReview",
-    "prismStylingBeforeScaffoldApproval"
+    "identityStylingWithoutExplicitOwnerApproval"
   ],
   "handoff": "DESIGN_HANDOFF.md",
   "scaffoldStylesheet": "src/themes/scaffold.css",
-  "nextAction": "Verify reduced-motion behavior and complete the Scaffold review on the physical event tablet"
+  "nextAction": "Review the Spotlight venue display at 1366×668, then make dead-space, MC-talk, and host-note controls more conspicuous"
 }

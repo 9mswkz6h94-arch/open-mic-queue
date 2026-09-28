@@ -149,7 +149,7 @@ export default function TVDisplay({ eventSlug }) {
     : hasPhoto ? 'with-photo' : 'copy-only'
 
   return (
-    <div className={`tv-display tv-size-${displaySize}${isCalibrating ? ' is-calibrating' : ''}`}>
+    <div data-rh-theme="spotlight" data-spotlight-expression="focus" className={`tv-display tv-size-${displaySize}${isCalibrating ? ' is-calibrating' : ''}`}>
       <header className="tv-header">
         <div className="tv-title-lockup"><p className="tv-kicker">Rainbow Heart Studio presents</p><h1>{EVENT_NAME}</h1></div>
         <div className="tv-event-meta">

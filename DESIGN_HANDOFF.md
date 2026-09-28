@@ -1,9 +1,9 @@
 # Design Handoff — Open Mic Queue
 
 **Project:** `proj-002`  
-**Design-system version:** `0.1.3`  
-**Current phase:** Scaffold review  
-**Target identity:** Prism  
+**Design-system version:** `0.8.0`  
+**Current phase:** Spotlight identity application  
+**Target identity:** Spotlight  
 **Last updated:** 2026-09-27
 
 ## Read first
@@ -20,6 +20,8 @@
 The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/VISUAL_IDENTITY_SYSTEM.md` captures the Open Mic conversation that seeded the shared system and should not supersede it.
 
 ## Completed
+
+0.1. Jonathan explicitly authorized the Spotlight identity pass after the September live-event field report. The venue display now uses the accepted Spotlight Focus expression, locally bundled Instrument Sans/Serif and Space Mono, the canonical room palette, one bounded orange-yellow performer reveal, an unobstructed known subject, a serif witness line, and a violet labeled Up Next edge. Structural TV collision repairs remain intact. This does not authorize production deployment.
 
 0. On the isolated `feat/reaper-timeline` branch, added an event-scoped, append-only recording timeline, host recording/marker/gap controls, privacy-limited JSON/CSV/REAPER exports, deterministic mock persistence, a synthetic Nelson's fixture, and migration/rollback files. No production migration or deployment was performed. See `docs/REAPER_TIMELINE_ARCHITECTURE.md`.
 
@@ -115,4 +117,4 @@ The uncommitted strategy and validation documents belong to existing work and mu
 
 ## One next action
 
-Verify reduced-motion behavior and complete the Scaffold review on the physical event tablet. Prism remains blocked until the matrix is approved.
+Review the Spotlight venue display at 1366×668 on the actual television, then make dead-space, MC-talk, and host-note controls more conspicuous without changing production data.

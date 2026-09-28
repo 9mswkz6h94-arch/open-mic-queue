@@ -23,3 +23,12 @@ test('venue display isolates sidebar regions and gives the QR code its own colum
   assert.match(displayStyles, /\.tv-sidebar section \{[^}]*overflow:hidden;/)
   assert.match(displayStyles, /\.tv-qr-card \{[^}]*grid-template-columns:minmax\(0,1fr\) auto;/)
 })
+
+test('venue display applies the accepted Spotlight focus identity', () => {
+  assert.match(displaySource, /data-rh-theme="spotlight"/)
+  assert.match(displaySource, /data-spotlight-expression="focus"/)
+  assert.match(displayStyles, /font-family:"Instrument Sans"/)
+  assert.match(displayStyles, /--spotlight-live:#ff904e;/)
+  assert.match(displayStyles, /--spotlight-on-deck:#8b51fe;/)
+  assert.match(displayStyles, /\.tv-performer-content::before \{[^}]*radial-gradient/)
+})
