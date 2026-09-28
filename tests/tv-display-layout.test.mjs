@@ -25,6 +25,9 @@ test('venue display protects the title and upcoming performers from wrapping', (
 test('venue display isolates sidebar regions and gives the QR code its own column', () => {
   assert.match(displayStyles, /\.tv-sidebar section \{[^}]*overflow:hidden;/)
   assert.match(displayStyles, /\.tv-qr-card \{[^}]*grid-template-columns:minmax\(0,1fr\) auto;/)
+  assert.match(displaySource, /isFullscreen \? ' is-fullscreen'/)
+  assert.match(displayStyles, /\.tv-display\.is-fullscreen \.tv-qr-card svg \{[^}]*224px/)
+  assert.match(displayStyles, /\.tv-display\.is-fullscreen \.tv-donation-card svg \{[^}]*136px/)
 })
 
 test('venue display applies the accepted Spotlight focus identity', () => {
