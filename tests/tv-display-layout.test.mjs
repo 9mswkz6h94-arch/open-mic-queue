@@ -96,3 +96,11 @@ test('next song is a combined timeline and TV-display action', () => {
   assert.match(displayStyles, /\.tv-songs p\.is-active/)
   assert.match(liveShowChannelSource, /localStorage\.setItem/)
 })
+
+test('legacy host console removes the duplicate current-performer column', () => {
+  assert.doesNotMatch(adminSource, /className="host-command-stage"/)
+  assert.match(productionControlsSource, /Finish set → next/)
+  assert.match(productionControlsSource, /Edit featured set/)
+  assert.match(productionControlsSource, /Delete current performer/)
+  assert.match(appStyles, /grid-template-columns:\s*minmax\(34rem, 1\.45fr\)\s*minmax\(20rem, 0\.75fr\)/)
+})

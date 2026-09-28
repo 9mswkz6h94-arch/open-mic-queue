@@ -8,7 +8,7 @@ const GAP_TYPES = [
   ['unplanned_gap', 'Unplanned Gap'],
 ]
 
-export default function ProductionTimelineControls({ recording, status, onStartRecording, onStopRecording, onMarker, onDoNotPublish, doNotPublishOpen, onGap, openGap, onResync, onExport, cueCount, currentPerformer, currentSongIndex, currentSongTitle, songCount, onPreviousSong, onNextSong }) {
+export default function ProductionTimelineControls({ recording, status, onStartRecording, onStopRecording, onMarker, onDoNotPublish, doNotPublishOpen, onGap, openGap, onResync, onExport, cueCount, currentPerformer, currentSongIndex, currentSongTitle, songCount, onPreviousSong, onNextSong, onEditPerformer, onToggleFeatured, onFinishSet, onDeletePerformer }) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [filename, setFilename] = useState('')
   const [note, setNote] = useState('')
@@ -29,6 +29,11 @@ export default function ProductionTimelineControls({ recording, status, onStartR
           <span>{currentPerformer ? `${currentSongIndex + 1} of ${songCount}` : '—'}</span>
           <button className="btn btn-primary btn-small" disabled={!currentPerformer || currentSongIndex >= songCount - 1} onClick={onNextSong}>Next song + marker</button>
         </div>
+        {currentPerformer && <div className="production-performer-actions">
+          <button className="btn btn-outline btn-small" onClick={onEditPerformer}>{currentPerformer.entry_role === 'featured_artist' ? 'Edit featured set' : 'Edit performer'}</button>
+          <button className="btn btn-outline btn-small" onClick={onToggleFeatured}>{currentPerformer.entry_role === 'featured_artist' ? 'Remove feature' : 'Make featured'}</button>
+          <button className="btn btn-primary btn-small" onClick={onFinishSet}>Finish set → next</button>
+        </div>}
       </div>
       <div className="production-timeline-primary">
         {!recording ? <button className="btn btn-primary" onClick={() => onStartRecording({ filename })}>Recording Started</button> : <button className="btn btn-outline" onClick={onStopRecording}>Recording Stopped</button>}
@@ -44,6 +49,7 @@ export default function ProductionTimelineControls({ recording, status, onStartR
           {GAP_TYPES.map(([code, label]) => <button key={code} className={`btn btn-small ${openGap === code ? 'btn-primary' : 'btn-outline'}`} disabled={!recording} onClick={() => onGap(code, note)}>{openGap === code ? `End ${label}` : label}</button>)}
           <button className="btn btn-small btn-outline" disabled={!recording} onClick={() => onResync(note)}>Resync Recording</button>
           <button className="btn btn-small btn-outline" disabled={!cueCount} onClick={onExport}>Export Timeline Package</button>
+          {currentPerformer && <button className="btn btn-small btn-delete" onClick={onDeletePerformer}>Delete current performer</button>}
         </div>
       </div>}
     </section>

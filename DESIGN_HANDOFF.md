@@ -132,3 +132,10 @@ The uncommitted strategy and validation documents belong to existing work and mu
 ## One next action
 
 Complete responsive and workflow review of Spotlight across phone, tablet, desktop, 200% zoom, and reduced motion; then make dead-space, MC-talk, and host-note controls more conspicuous without changing production data.
+
+## 0.6 — Host console current-set consolidation (2026-09-27)
+
+- Removed the duplicate large `Now Performing` column from the desktop Host Console. The live performer, active song, and set progress already appear in the recording timeline and TV preview, so the extra card consumed operational space without adding a distinct decision.
+- Consolidated current-performer actions into the timeline's `Live Set` strip: edit performer/featured set, toggle featured status, finish the set and advance, and delete the current performer from the expanded timeline tools.
+- Preserved the Spotlight visual language and reclaimed the lower console for a wider `Up Next` workspace plus `Performed` history and queue totals.
+- Verification: 20 automated tests passed and the production Vite build completed with 114 modules. Review remained mock-isolated; no Supabase migration or Netlify deployment was performed.

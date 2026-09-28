@@ -811,6 +811,10 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       songCount={currentPerformer ? getSongTitles(currentPerformer).length : 0}
       onPreviousSong={() => currentPerformer && selectCurrentSong(currentPerformer, currentSongIndex - 1)}
       onNextSong={() => currentPerformer && selectCurrentSong(currentPerformer, currentSongIndex + 1)}
+      onEditPerformer={() => currentPerformer && onEditPerformer(currentPerformer.id)}
+      onToggleFeatured={() => currentPerformer && toggleFeaturedArtist(currentPerformer)}
+      onFinishSet={() => currentPerformer && skipPerformer(currentPerformer.id)}
+      onDeletePerformer={() => currentPerformer && deletePerformer(currentPerformer.id, currentPerformer.stage_name)}
     />
   )
 
@@ -1042,69 +1046,6 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       )}
 
       <div className="host-command-grid">
-        <section className="host-command-stage" aria-label="Stage controls">
-      {/* Currently Performing */}
-      {currentPerformer ? (
-        <div className="queue-progress">
-          <div className="current-section">
-            <div className="status-label">NOW PERFORMING</div>
-            {currentPerformer.started_at && (
-              <div className="timestamp-display" style={{ marginBottom: '8px' }}>
-                Started at {new Date(currentPerformer.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            )}
-            <div className="performer-card current-large">
-              {currentPerformer.profile_picture_url && (
-                <img
-                  src={currentPerformer.profile_picture_url}
-                  alt={currentPerformer.stage_name}
-                  style={{ width: '100px', height: '100px', borderRadius: '8px', objectFit: 'cover', marginBottom: '16px', border: '3px solid rgba(255,255,255,0.2)' }}
-                />
-              )}
-              <h3>{currentPerformer.stage_name}</h3>
-              {currentPerformer.entry_role === 'featured_artist' && <span className="featured-artist-badge">Featured Artist · up to 7 songs</span>}
-              <p className="real-name">{currentPerformer.real_name}</p>
-              <div className="songs-list host-song-progress" aria-label="Current performer song progression">
-                {getSongTitles(currentPerformer).map((song, index) => (
-                  <div
-                    key={`${currentPerformer.id}-song-${index}`}
-                    className={`host-song-cue${currentSongIndex === index ? ' is-current' : ''}`}
-                  >
-                    <strong>{index + 1}.</strong> {song}
-                  </div>
-                ))}
-              </div>
-              <div className="button-group">
-                <button onClick={() => onEditPerformer(currentPerformer.id)} className="btn btn-outline btn-small">
-                  {currentPerformer.entry_role === 'featured_artist' ? 'Edit featured set' : 'Edit performer'}
-                </button>
-                <button onClick={() => toggleFeaturedArtist(currentPerformer)} className="btn btn-outline btn-small">
-                  {currentPerformer.entry_role === 'featured_artist' ? 'Remove feature' : 'Make featured'}
-                </button>
-                <button onClick={() => skipPerformer(currentPerformer.id)} className="btn btn-primary">
-                  Mark Performed → Next
-                </button>
-                <button onClick={() => deletePerformer(currentPerformer.id, currentPerformer.stage_name)} className="btn btn-delete btn-small">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="queue-progress">
-          <div className="current-section empty">
-            <p>No performer currently on stage</p>
-            {upcomingPerformers.length > 0 && (
-              <button onClick={() => markCurrent(upcomingPerformers[0].id)} className="btn btn-primary" style={{ marginTop: '12px' }}>
-                Start First Performer
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-        </section>
-
         <section className="host-command-queue" aria-label="Upcoming performer queue">
       {/* Drag-and-drop Queue */}
       <div className="queue-list-admin">
