@@ -17,15 +17,6 @@ const SUPPORT_LINKS = [
 const DISPLAY_SIZES = ['standard', 'large', 'extra-large']
 const DISPLAY_SIZE_LABELS = { standard: 'Standard', large: 'Large', 'extra-large': 'Extra Large' }
 
-function getInitialDisplaySize() {
-  try {
-    const savedSize = window.localStorage.getItem('open-mic-tv-display-size')
-    return DISPLAY_SIZES.includes(savedSize) ? savedSize : 'large'
-  } catch {
-    return 'large'
-  }
-}
-
 function CalibrationView({ displaySize, onDisplaySizeChange, onClose, eventHomeUrl }) {
   return (
     <main className="tv-calibration">
@@ -65,7 +56,7 @@ export default function TVDisplay({ eventSlug }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement || document.webkitFullscreenElement))
-  const [displaySize, setDisplaySize] = useState(getInitialDisplaySize)
+  const [displaySize, setDisplaySize] = useState('large')
   const [isCalibrating, setIsCalibrating] = useState(() => new URLSearchParams(window.location.search).get('calibrate') === '1')
   const [publishedPrompt, setPublishedPrompt] = useState(null)
   const eventHomeUrl = import.meta.env.VITE_PHONE_QUEUE_URL || `${PUBLIC_APP_URL}${eventPath(eventSlug)}`
@@ -138,11 +129,6 @@ export default function TVDisplay({ eventSlug }) {
   function changeDisplaySize(nextSize) {
     if (!DISPLAY_SIZES.includes(nextSize)) return
     setDisplaySize(nextSize)
-    try {
-      window.localStorage.setItem('open-mic-tv-display-size', nextSize)
-    } catch {
-      // The display still works when browser storage is unavailable.
-    }
   }
 
   const activePerformers = useMemo(() => performers.filter(performer => !performer.attended), [performers])
@@ -165,20 +151,10 @@ export default function TVDisplay({ eventSlug }) {
   return (
     <div className={`tv-display tv-size-${displaySize}${isCalibrating ? ' is-calibrating' : ''}`}>
       <header className="tv-header">
-        <div><p className="tv-kicker">Rainbow Heart Studio presents</p><h1>{EVENT_NAME}</h1></div>
+        <div className="tv-title-lockup"><p className="tv-kicker">Rainbow Heart Studio presents</p><h1>{EVENT_NAME}</h1></div>
         <div className="tv-event-meta">
           <span>Live tonight</span>
           <strong>{VENUE_NAME}</strong>
-          <div className="tv-size-control tv-size-control-compact" role="group" aria-label="Display text size">
-            {DISPLAY_SIZES.map(size => (
-              <button key={size} type="button" className={displaySize === size ? 'is-active' : ''} aria-pressed={displaySize === size} title={DISPLAY_SIZE_LABELS[size]} onClick={() => changeDisplaySize(size)}>
-                {size === 'extra-large' ? 'XL' : size.charAt(0).toUpperCase()}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="tv-calibrate-button" onClick={() => setIsCalibrating(value => !value)}>
-            {isCalibrating ? 'Return' : 'Calibrate'}
-          </button>
           <button type="button" className="tv-fullscreen-button" onClick={toggleFullscreen}>
             {isFullscreen ? 'Exit full screen' : 'Full screen'}
           </button>
