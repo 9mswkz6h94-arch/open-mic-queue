@@ -121,8 +121,11 @@ export async function undoShowTransition(input) {
 
 async function sendUndoRpc(input) {
   const { data, error } = await supabase.rpc('host_undo_show_transition', {
-    p_event_id: input.eventId, p_occurred_at: input.occurredAt, p_client_cue_id: input.clientCueId,
-    p_corrects_cue_id: input.correctsCueId, p_snapshots: input.snapshots, p_note: input.note || null,
+    p_event_id: input.eventId,
+    p_occurred_at: input.occurredAt,
+    p_corrections: input.corrections || [],
+    p_snapshots: input.snapshots,
+    p_note: input.note || null,
   })
   if (error) throw error
   return data

@@ -32,6 +32,7 @@
 .tv-performer h2.tv-name-long { font-size:clamp(3rem,5vw,6rem); }.tv-performer h2.tv-name-very-long { font-size:clamp(2.2rem,3.8vw,4.25rem); line-height:.9; }
 .tv-real-name { margin:1rem 0 2rem; color:var(--spotlight-muted); font-family:"Instrument Serif",Georgia,serif; font-size:clamp(1.2rem,1.8vw,2rem); }
 .tv-songs { border-top:1px solid var(--spotlight-border); }.tv-songs p { display:flex; gap:1.25rem; margin:0; padding:1rem 0; border-bottom:1px solid var(--spotlight-border-quiet); font-size:var(--tv-song-text); }.tv-songs span { color:var(--spotlight-live); font-family:"Space Mono",Consolas,monospace; font-weight:700; }
+.tv-songs p.is-active { padding-left:.85rem; border-left:5px solid var(--spotlight-live); background:rgba(255,144,78,.14); color:var(--spotlight-text); font-weight:700; }
 .tv-songs .tv-more-songs { color:var(--spotlight-muted); font-size:clamp(.9rem,1.1vw,1.15rem); text-transform:uppercase; }
 .tv-artist-note { max-width:58ch; color:var(--spotlight-muted); font-family:"Instrument Serif",Georgia,serif; font-size:clamp(1rem,1.25vw,1.4rem); font-style:italic; line-height:1.4; }
 .tv-photo-frame { width:100%; aspect-ratio:4/5; max-height:55vh; border:2px solid var(--spotlight-live); background:var(--spotlight-raised); }.tv-photo-frame img { width:100%; height:100%; object-fit:cover; }.tv-photo-placeholder { height:100%; display:grid; place-items:center; color:var(--spotlight-text); font-family:"Space Mono",Consolas,monospace; font-size:4rem; }

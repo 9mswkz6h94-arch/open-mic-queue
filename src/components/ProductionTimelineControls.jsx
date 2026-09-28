@@ -8,7 +8,7 @@ const GAP_TYPES = [
   ['unplanned_gap', 'Unplanned Gap'],
 ]
 
-export default function ProductionTimelineControls({ recording, status, onStartRecording, onStopRecording, onMarker, onGap, openGap, onResync, onExport, cueCount }) {
+export default function ProductionTimelineControls({ recording, status, onStartRecording, onStopRecording, onMarker, onDoNotPublish, doNotPublishOpen, onGap, openGap, onResync, onExport, cueCount, currentPerformer, currentSongIndex, currentSongTitle, songCount, onPreviousSong, onNextSong }) {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [filename, setFilename] = useState('')
   const [note, setNote] = useState('')
@@ -20,11 +20,21 @@ export default function ProductionTimelineControls({ recording, status, onStartR
         <strong>{recording ? `Recording · ${recording.label}` : 'Not recording'}</strong>
         <small className={`timeline-sync timeline-sync-${status}`}>{status === 'saving' ? 'Saving…' : status === 'pending' ? 'Pending sync' : status === 'error' ? 'Sync error' : 'Synced'} · {cueCount} cues</small>
       </div>
+      <div className="production-live-set" aria-label="Live song and timeline progression">
+        <span className="eyebrow">Live set</span>
+        <strong>{currentPerformer?.stage_name || 'Stage open'}</strong>
+        <span className="production-live-song">{currentSongTitle ? `${String(currentSongIndex + 1).padStart(2, '0')} · ${currentSongTitle}` : 'No active song'}</span>
+        <div className="production-song-actions">
+          <button className="btn btn-outline btn-small" disabled={!currentPerformer || currentSongIndex <= 0} onClick={onPreviousSong}>Previous song</button>
+          <span>{currentPerformer ? `${currentSongIndex + 1} of ${songCount}` : '—'}</span>
+          <button className="btn btn-primary btn-small" disabled={!currentPerformer || currentSongIndex >= songCount - 1} onClick={onNextSong}>Next song + marker</button>
+        </div>
+      </div>
       <div className="production-timeline-primary">
         {!recording ? <button className="btn btn-primary" onClick={() => onStartRecording({ filename })}>Recording Started</button> : <button className="btn btn-outline" onClick={onStopRecording}>Recording Stopped</button>}
         <button className="btn btn-outline" disabled={!recording} onClick={() => onMarker('highlight', note)}>Highlight</button>
         <button className="btn btn-outline" disabled={!recording} onClick={() => onMarker('audio_issue', note)}>Audio Issue</button>
-        <button className="btn btn-outline" disabled={!recording} onClick={() => onMarker('do_not_publish_started', note, 'do_not_publish')}>Do Not Publish</button>
+        <button className={`btn ${doNotPublishOpen ? 'btn-primary' : 'btn-outline'}`} disabled={!recording} onClick={() => onDoNotPublish(note)}>{doNotPublishOpen ? 'End Do Not Publish' : 'Do Not Publish'}</button>
         <button className="btn btn-outline" onClick={() => setDetailsOpen(value => !value)} aria-expanded={detailsOpen}>More Timeline Tools</button>
       </div>
       {detailsOpen && <div className="production-timeline-more">

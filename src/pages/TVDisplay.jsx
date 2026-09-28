@@ -5,6 +5,7 @@ import { getSongTitles } from '../lib/songTitles'
 import { eventPath } from '../lib/routes'
 import { DISPLAY_PROMPT_EVENT, readDisplayPrompt } from '../lib/displayPromptChannel'
 import { useEventRecord } from '../lib/eventContext'
+import { LIVE_SHOW_STATE_EVENT, readLiveShowState } from '../lib/liveShowStateChannel'
 import './TVDisplay.css'
 
 const PUBLIC_APP_URL = import.meta.env.VITE_PUBLIC_APP_URL || 'https://open-mic-queue.netlify.app'
@@ -58,7 +59,21 @@ export default function TVDisplay({ eventSlug }) {
   const [displaySize, setDisplaySize] = useState('large')
   const [isCalibrating, setIsCalibrating] = useState(() => new URLSearchParams(window.location.search).get('calibrate') === '1')
   const [publishedPrompt, setPublishedPrompt] = useState(null)
+  const [liveShowState, setLiveShowState] = useState(() => readLiveShowState(eventSlug))
   const eventHomeUrl = import.meta.env.VITE_PHONE_QUEUE_URL || `${PUBLIC_APP_URL}${eventPath(eventSlug)}`
+
+  useEffect(() => {
+    const syncLiveShowState = () => setLiveShowState(readLiveShowState(eventSlug))
+    syncLiveShowState()
+    window.addEventListener('storage', syncLiveShowState)
+    window.addEventListener(LIVE_SHOW_STATE_EVENT, syncLiveShowState)
+    const interval = window.setInterval(syncLiveShowState, 1000)
+    return () => {
+      window.removeEventListener('storage', syncLiveShowState)
+      window.removeEventListener(LIVE_SHOW_STATE_EVENT, syncLiveShowState)
+      window.clearInterval(interval)
+    }
+  }, [eventSlug])
 
   useEffect(() => {
     let active = true
@@ -171,9 +186,14 @@ export default function TVDisplay({ eventSlug }) {
                 <h2 className={performerNameClass}>{currentPerformer.stage_name}</h2>
                 {hasDistinctRealName && <p className="tv-real-name">{currentPerformer.real_name}</p>}
                 {currentSongs.length > 0 && <div className="tv-songs">
-                  {visibleCurrentSongs.map((song, index) => (
-                    <p key={`${currentPerformer.id}-song-${index}`}><span>{String(index + 1).padStart(2, '0')}</span>{song}</p>
-                  ))}
+                  {visibleCurrentSongs.map((song, index) => {
+                    const isActiveSong = liveShowState?.entryId === currentPerformer.id
+                      ? liveShowState.songPosition === index + 1
+                      : index === 0
+                    return (
+                    <p key={`${currentPerformer.id}-song-${index}`} className={isActiveSong ? 'is-active' : ''} aria-current={isActiveSong ? 'true' : undefined}><span>{String(index + 1).padStart(2, '0')}</span>{song}</p>
+                    )
+                  })}
                   {currentSongs.length > visibleCurrentSongs.length && (
                     <p className="tv-more-songs"><span>+</span>{currentSongs.length - visibleCurrentSongs.length} more in featured set</p>
                   )}

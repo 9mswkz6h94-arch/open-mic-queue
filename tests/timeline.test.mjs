@@ -46,6 +46,18 @@ test('derived state closes songs and intervals in sequence order', () => {
   assert.equal(state.openGap, null)
 })
 
+test('derived state ignores voided transition cues and tracks do-not-publish regions', () => {
+  const state = deriveTimelineState([
+    cue(1, 'performer_started', 0, { entry_id: 'entry-1' }),
+    cue(2, 'do_not_publish_started', 1000),
+    cue(3, 'performer_ended', 2000, { entry_id: 'entry-1' }),
+    cue(4, 'cue_corrected', 2100, { corrects_cue_id: 'cue-3' }),
+    cue(5, 'do_not_publish_ended', 3000),
+  ])
+  assert.equal(state.activeEntryId, 'entry-1')
+  assert.equal(state.doNotPublishOpen, false)
+})
+
 test('correction cues remain append-only and identify the corrected marker', () => {
   const timeline = buildTimelinePackage({ event, recording, cues: [cue(1, 'performer_started', 0), cue(2, 'cue_corrected', 100, { corrects_cue_id: 'cue-1', is_edit_marker: true, note: 'Host undo' })] })
   assert.equal(timeline.cues.length, 2)

@@ -10,6 +10,8 @@ const fixtureSource = await readFile(new URL('../src/lib/mockFixtures.js', impor
 const environmentBannerSource = await readFile(new URL('../src/components/EnvironmentBanner.jsx', import.meta.url), 'utf8')
 const adminSource = await readFile(new URL('../src/pages/Admin.jsx', import.meta.url), 'utf8')
 const appStyles = await readFile(new URL('../src/App.css', import.meta.url), 'utf8')
+const productionControlsSource = await readFile(new URL('../src/components/ProductionTimelineControls.jsx', import.meta.url), 'utf8')
+const liveShowChannelSource = await readFile(new URL('../src/lib/liveShowStateChannel.js', import.meta.url), 'utf8')
 
 test('venue display keeps calibration controls out of the live header', () => {
   const liveHeader = displaySource.match(/<header className="tv-header">([\s\S]*?)<\/header>/)?.[1] || ''
@@ -83,4 +85,14 @@ test('desktop host queue separates performer details from its action grid', () =
   assert.match(adminSource, /performer\.real_name !== performer\.stage_name/)
   assert.match(appStyles, /\.host-command-queue \.queue-actions \{[\s\S]*?grid-column: 1 \/ -1;/)
   assert.match(appStyles, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/)
+})
+
+test('next song is a combined timeline and TV-display action', () => {
+  assert.match(productionControlsSource, /Next song \+ marker/)
+  assert.match(productionControlsSource, /Live song and timeline progression/)
+  assert.match(adminSource, /publishLiveSongState\(eventSlug/)
+  assert.match(displaySource, /LIVE_SHOW_STATE_EVENT/)
+  assert.match(displaySource, /className=\{isActiveSong \? 'is-active'/)
+  assert.match(displayStyles, /\.tv-songs p\.is-active/)
+  assert.match(liveShowChannelSource, /localStorage\.setItem/)
 })

@@ -25,6 +25,8 @@ The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/V
 
 0.4. Reflowed each desktop Host Console queue entry into a dedicated performer-information row and a separate three-column action grid. Matching stage and real names no longer render twice, song titles retain readable line height, and Edit, Make Featured, Start, Done, and Delete remain full-size labeled controls without compressing the artist information.
 
+0.5. Folded live song progression into the recording timeline strip. `Previous song` and `Next song + marker` now share the active performer/song context with recording status; advancing a song writes the existing song-ended/song-started timeline cues and publishes the active song to the same-device venue display. The TV gives the active song an orange priority edge and warm bounded field. The large stage card is now status and performer-management only instead of duplicating song controls.
+
 0.2. Extended Spotlight from the venue display to the entire application through `src/themes/spotlight.css`, loaded after Scaffold so structure remains authoritative. Public queue, signup, artist entry, account access, Host Console, queue states, forms, messages, and timeline surfaces now share the accepted local fonts, room palette, purpose-color mapping, square/2px geometry, explicit focus, and non-color state edges. Local mock-isolated rendered review covered the public queue, signup, artist-entry empty state, and Host Console. Production remains undeployed.
 
 0.1. Jonathan explicitly authorized the Spotlight identity pass after the September live-event field report. The venue display now uses the accepted Spotlight Focus expression, locally bundled Instrument Sans/Serif and Space Mono, the canonical room palette, one bounded orange-yellow performer reveal, an unobstructed known subject, a serif witness line, and a violet labeled Up Next edge. Structural TV collision repairs remain intact. This does not authorize production deployment.
@@ -66,6 +68,7 @@ The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/V
 - A true 390×844-equivalent phone render passed without horizontal clipping after constraining the environment banner, two-column navigation controls, hero, and root surfaces. Brother Jon's current-performer card remained next in the reading order after the event introduction.
 - Seventeen automated tests passed and the production Vite build completed with 113 modules after the responsive repair.
 - The crowded Host Console queue entry reported during rendered review was rechecked at 1524×1252. Performer identity and songs remained in an uncluttered top row, five actions rendered below in a three-column grid, and eighteen automated tests plus the production build passed.
+- In mock-isolated review, `Next song + marker` advanced Marisol Vega from `Paper Moons` to `Borrowed Weather`, added the timeline transition cues, and moved the TV display's active-song treatment to `02 Borrowed Weather`.
 - The companion recording workflow imported the checked-in Nelson's JSON fixture into a project copy with 8 cues, 6 logical entries, 8 REAPER marker/region lines, zero warnings, preserved source hashing, idempotent `[OMQ]` replacement, and four passing importer tests. This is synthetic integration evidence, not production activation approval.
 
 - Production build completed successfully with Vite on 2026-08-09.
@@ -91,6 +94,7 @@ These are static-review observations, not completed workflow approval. The autho
 
 ## Known issues
 
+- Active-song TV synchronization currently uses a same-origin browser channel suitable for the host laptop and its attached venue display. A TV running on a separate device still requires the planned authenticated Supabase realtime event-state channel before this behavior can be called multi-device production-ready.
 - Atomic show-transition RPCs and a durable IndexedDB retry outbox are implemented on the isolated timeline branch. They still require disposable-Supabase execution and physical network-interruption/browser-restart evidence before production activation. The migrations remain intentionally unapplied.
 
 - The existing signup is still one long form; the six-screen tablet kiosk flow is specified but not implemented.

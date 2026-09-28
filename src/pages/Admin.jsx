@@ -29,6 +29,7 @@ import { pathForPage } from '../lib/routes'
 import { applyShowTransition, loadTimeline, recordCue, startRecording, undoShowTransition } from '../lib/timelineClient'
 import { downloadTimelinePackage } from '../lib/timelineExports'
 import { deriveTimelineState } from '../lib/timelineState'
+import { publishLiveSongState } from '../lib/liveShowStateChannel'
 import {
   clearDisplayPrompt,
   createDisplayPrompt,
@@ -550,6 +551,12 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
     await saveTimelineCue({ cueType: 'song_started', entryId: performer.id, performerLabel: performer.stage_name, songPosition: safeIndex + 1, songLabel: songs[safeIndex] })
     }
     setCurrentSongByPerformer(previous => ({ ...previous, [performer.id]: safeIndex }))
+    publishLiveSongState(eventSlug, {
+      entryId: performer.id,
+      performerLabel: performer.stage_name,
+      songPosition: safeIndex + 1,
+      songLabel: songs[safeIndex],
+    })
   }
 
   async function draftPublicPrompt() {
@@ -798,6 +805,12 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
       onGap={toggleTimelineGap}
       onResync={(note) => addTimelineMarker('recording_resynced', note)}
       onExport={exportTimestamps}
+      currentPerformer={currentPerformer}
+      currentSongIndex={currentSongIndex}
+      currentSongTitle={currentSongTitle}
+      songCount={currentPerformer ? getSongTitles(currentPerformer).length : 0}
+      onPreviousSong={() => currentPerformer && selectCurrentSong(currentPerformer, currentSongIndex - 1)}
+      onNextSong={() => currentPerformer && selectCurrentSong(currentPerformer, currentSongIndex + 1)}
     />
   )
 
@@ -1053,37 +1066,14 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
               <p className="real-name">{currentPerformer.real_name}</p>
               <div className="songs-list host-song-progress" aria-label="Current performer song progression">
                 {getSongTitles(currentPerformer).map((song, index) => (
-                  <button
+                  <div
                     key={`${currentPerformer.id}-song-${index}`}
-                    type="button"
                     className={`host-song-cue${currentSongIndex === index ? ' is-current' : ''}`}
-                    aria-pressed={currentSongIndex === index}
-                    onClick={() => selectCurrentSong(currentPerformer, index)}
                   >
                     <strong>{index + 1}.</strong> {song}
-                  </button>
+                  </div>
                 ))}
               </div>
-              <div className="host-song-actions">
-                <button
-                  type="button"
-                  className="btn btn-outline btn-small"
-                  disabled={currentSongIndex === 0}
-                  onClick={() => selectCurrentSong(currentPerformer, currentSongIndex - 1)}
-                >
-                  Previous song
-                </button>
-                <span className="host-song-counter">Song {currentSongIndex + 1} of {getSongTitles(currentPerformer).length}</span>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-small"
-                  disabled={currentSongIndex >= getSongTitles(currentPerformer).length - 1}
-                  onClick={() => selectCurrentSong(currentPerformer, currentSongIndex + 1)}
-                >
-                  Next song
-                </button>
-              </div>
-              <small className="host-song-note">Song changes are included in this session's timestamp export.</small>
               <div className="button-group">
                 <button onClick={() => onEditPerformer(currentPerformer.id)} className="btn btn-outline btn-small">
                   {currentPerformer.entry_role === 'featured_artist' ? 'Edit featured set' : 'Edit performer'}
