@@ -21,6 +21,8 @@ The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/V
 
 ## Completed
 
+0.3. Repaired the Spotlight venue display and public queue at their two critical presentation sizes. The 1920×1080 and 1366×668 TV compositions now keep the complete event title, performer/photo field, queue QR, support controls, and Up Next ticker inside the viewport. The 390×844 public queue now constrains the mock-review banner, navigation grid, hero, and queue surfaces without horizontal clipping while preserving 48 px controls and the Spotlight hierarchy. Production remains undeployed.
+
 0.2. Extended Spotlight from the venue display to the entire application through `src/themes/spotlight.css`, loaded after Scaffold so structure remains authoritative. Public queue, signup, artist entry, account access, Host Console, queue states, forms, messages, and timeline surfaces now share the accepted local fonts, room palette, purpose-color mapping, square/2px geometry, explicit focus, and non-color state edges. Local mock-isolated rendered review covered the public queue, signup, artist-entry empty state, and Host Console. Production remains undeployed.
 
 0.1. Jonathan explicitly authorized the Spotlight identity pass after the September live-event field report. The venue display now uses the accepted Spotlight Focus expression, locally bundled Instrument Sans/Serif and Space Mono, the canonical room palette, one bounded orange-yellow performer reveal, an unobstructed known subject, a serif witness line, and a violet labeled Up Next edge. Structural TV collision repairs remain intact. This does not authorize production deployment.
@@ -58,6 +60,9 @@ The shared visual-identity rules now live in Rainbow Heart OS. The older `docs/V
 
 ## Evidence collected
 
+- Mock-isolated renders using the public `tonight-show` fixture passed at 1920×1080 and the venue reference size of 1366×668. The full event title, Brother Jon photo, two fallback song labels, primary queue QR, both support QR controls, and scrolling Up Next region stayed within the 16:9 viewport.
+- A true 390×844-equivalent phone render passed without horizontal clipping after constraining the environment banner, two-column navigation controls, hero, and root surfaces. Brother Jon's current-performer card remained next in the reading order after the event introduction.
+- Seventeen automated tests passed and the production Vite build completed with 113 modules after the responsive repair.
 - The companion recording workflow imported the checked-in Nelson's JSON fixture into a project copy with 8 cues, 6 logical entries, 8 REAPER marker/region lines, zero warnings, preserved source hashing, idempotent `[OMQ]` replacement, and four passing importer tests. This is synthetic integration evidence, not production activation approval.
 
 - Production build completed successfully with Vite on 2026-08-09.

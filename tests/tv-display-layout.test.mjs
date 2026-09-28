@@ -24,6 +24,13 @@ test('venue display protects the title and upcoming performers from wrapping', (
   assert.doesNotMatch(displayStyles, /prefers-reduced-motion:reduce[^}]*flex-wrap:wrap;/)
 })
 
+test('long event names and donation controls stay bounded inside the TV grid', () => {
+  assert.match(displaySource, /tv-event-name-long/)
+  assert.match(displayStyles, /\.tv-header h1\.tv-event-name-long/)
+  assert.match(displayStyles, /\.tv-donation-heading \{ display:grid;/)
+  assert.match(displayStyles, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/)
+})
+
 test('venue display isolates sidebar regions and gives the QR code its own column', () => {
   assert.match(displayStyles, /\.tv-sidebar section \{[^}]*overflow:hidden;/)
   assert.match(displayStyles, /\.tv-qr-card \{[^}]*grid-template-columns:minmax\(0,1fr\) auto;/)

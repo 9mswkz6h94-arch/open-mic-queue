@@ -9,10 +9,11 @@ Allowed statuses: `Passed`, `Failed`, `Not tested`, `Blocked`, `Static review on
 
 | Gate | Status | Evidence | Environment | Follow-up |
 |---|---|---|---|---|
-| Phone 390×844 | Passed | Long-content fixture rendered without horizontal page overflow; visible interactive controls met 48 px minimums; phone screenshot inspected | Local browser, mock-isolated | Repeat on physical event tablet/phone when available |
+| Phone 390×844 | Passed | Long-content fixture and the Spotlight `tonight-show` fixture rendered without horizontal page overflow; the environment banner, two-column navigation, compact hero, and current-performer card remained bounded; visible interactive controls met 48 px minimums | Local browser, mock-isolated | Repeat on a physical event phone when available |
 | Tablet portrait 768×1024 | Passed | Long-content fixture rendered without horizontal page overflow and visible interactive controls met 48 px minimums | Local browser, mock-isolated | Physical tablet remains separate gate |
 | Tablet landscape 1024×768 | Passed | Long-content fixture rendered without horizontal page overflow and visible interactive controls met 48 px minimums | Local browser, mock-isolated | Physical tablet remains separate gate |
 | Desktop 1440×900 | Passed | Long-content fixture rendered without horizontal page overflow and visible interactive controls met 48 px minimums | Local browser, mock-isolated | Include in future regression automation |
+| Venue display 1366×668 and 1920×1080 | Passed | Spotlight `tonight-show` fixture retained the complete event title, performer/photo field, queue and support QR controls, and Up Next ticker within both 16:9 viewports | Headless Edge render, mock-isolated | Repeat on the physical venue television and projector |
 | Keyboard-only workflow | Passed | Jonathan completed the requested human review and reported the result as working well | Human review, mock-isolated | Include in future regression testing |
 | Visible focus | Passed | Focused navigation button rendered a 3 px solid blue outline | Local browser, mock-isolated | Confirm throughout human keyboard pass |
 | Minimum 48×48 touch targets | Passed | Rendered audit found no visible button, select, link, input, textarea, or role=button below 48 px at all four reference viewports after social-link correction | Local browser, mock-isolated | Include in regression automation |

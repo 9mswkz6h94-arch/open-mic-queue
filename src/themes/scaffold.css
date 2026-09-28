@@ -1149,9 +1149,20 @@ textarea:focus-visible,
 }
 
 @media (max-width: 640px) {
+  html,
+  body,
+  #root,
+  .app {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .environment-banner {
     align-items: stretch;
     flex-direction: column;
+    gap: var(--scaffold-space-2);
+    min-width: 0;
     padding: var(--scaffold-space-3);
   }
 
@@ -1161,11 +1172,25 @@ textarea:focus-visible,
   }
 
   .environment-banner > div {
+    min-width: 0;
     margin-right: 0;
   }
 
+  .environment-banner label {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .environment-banner span,
   .environment-banner code {
+    min-width: 0;
     overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .environment-banner select {
+    width: 100%;
+    min-width: 0;
   }
 
   .main-content {
@@ -1174,8 +1199,14 @@ textarea:focus-visible,
 
   .hero {
     grid-template-columns: 1fr;
-    row-gap: var(--scaffold-space-5);
-    padding: var(--scaffold-space-6) 0;
+    row-gap: var(--scaffold-space-3);
+    margin-bottom: var(--scaffold-space-5);
+    padding: var(--scaffold-space-5) 0;
+  }
+
+  .hero h1 {
+    max-width: 9ch;
+    font-size: clamp(2.75rem, 17vw, 4.25rem);
   }
 
   .hero .eyebrow,
@@ -1187,10 +1218,22 @@ textarea:focus-visible,
 
   .hero p:not(.eyebrow) {
     margin: 0;
+    padding-left: var(--scaffold-space-3);
+    font-size: var(--scaffold-text-meta);
   }
 
   .navbar-container {
+    width: 100%;
+    min-width: 0;
     padding: var(--scaffold-space-3);
+  }
+
+  .navbar-home,
+  .navbar-actions,
+  .navbar-actions .btn,
+  .user-email {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .navbar-context {
@@ -1199,6 +1242,11 @@ textarea:focus-visible,
 
   .navbar-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .navbar-actions .btn {
+    padding-inline: var(--scaffold-space-2);
+    overflow-wrap: anywhere;
   }
 
   .on-deck-list {

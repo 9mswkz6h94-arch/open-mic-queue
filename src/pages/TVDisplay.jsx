@@ -141,6 +141,7 @@ export default function TVDisplay({ eventSlug }) {
   const hasArtistNote = Boolean(currentPerformer?.performer_notes?.trim())
   const hasDistinctRealName = Boolean(currentPerformer?.real_name && currentPerformer.real_name !== currentPerformer.stage_name)
   const performerNameLength = currentPerformer?.stage_name?.length || 0
+  const eventNameClass = EVENT_NAME.length > 34 ? 'tv-event-name-long' : ''
   const performerNameClass = performerNameLength > 48 ? 'tv-name-very-long' : performerNameLength > 24 ? 'tv-name-long' : ''
   const contentNameClass = performerNameLength > 48 ? ' tv-content-very-long-name' : performerNameLength > 24 ? ' tv-content-long-name' : ''
   const performerLayout = currentPerformer && !hasPhoto && !currentSongs.length && !hasArtistNote && !hasDistinctRealName
@@ -150,7 +151,7 @@ export default function TVDisplay({ eventSlug }) {
   return (
     <div data-rh-theme="spotlight" data-spotlight-expression="focus" className={`tv-display tv-size-${displaySize}${isCalibrating ? ' is-calibrating' : ''}${isFullscreen ? ' is-fullscreen' : ''}`}>
       <header className="tv-header">
-        <div className="tv-title-lockup"><p className="tv-kicker">Rainbow Heart Studio presents</p><h1>{EVENT_NAME}</h1></div>
+        <div className="tv-title-lockup"><p className="tv-kicker">Rainbow Heart Studio presents</p><h1 className={eventNameClass}>{EVENT_NAME}</h1></div>
         <div className="tv-event-meta">
           <span>Live tonight</span>
           <button type="button" className="tv-fullscreen-button" onClick={toggleFullscreen}>
