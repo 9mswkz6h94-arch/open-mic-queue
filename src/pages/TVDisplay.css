@@ -26,7 +26,6 @@
 .tv-performer { min-width:0; min-height:0; overflow:hidden; padding:3vh 3vw; border-right:1px solid var(--spotlight-border); }
 .tv-performer-content { position:relative; isolation:isolate; height:calc(100% - 2rem); min-height:0; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(16rem,.75fr); gap:3vw; align-items:center; }
 .tv-performer-content::before { content:""; position:absolute; z-index:-2; left:-5%; top:3%; width:min(52vw,56rem); height:88%; background:radial-gradient(ellipse at 32% 50%,rgba(255,222,89,.22) 0,rgba(255,144,78,.14) 30%,rgba(255,144,78,0) 70%); pointer-events:none; }
-.tv-performer-content::after { content:""; position:absolute; z-index:-1; inset:4% auto 4% 0; width:min(56vw,62rem); border-block:2px solid var(--spotlight-live); pointer-events:none; }
 .tv-performer-copy,.tv-photo-frame { position:relative; z-index:1; }
 .tv-performer h2 { max-width:12ch; font-size:var(--tv-performer-name); overflow-wrap:anywhere; }
 .tv-performer h2.tv-name-long { font-size:clamp(3rem,5vw,6rem); }.tv-performer h2.tv-name-very-long { font-size:clamp(2.2rem,3.8vw,4.25rem); line-height:.9; }

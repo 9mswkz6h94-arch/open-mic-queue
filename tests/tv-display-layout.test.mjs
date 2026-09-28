@@ -34,6 +34,7 @@ test('venue display applies the accepted Spotlight focus identity', () => {
   assert.match(displayStyles, /--spotlight-live:#ff904e;/)
   assert.match(displayStyles, /--spotlight-on-deck:#8b51fe;/)
   assert.match(displayStyles, /\.tv-performer-content::before \{[^}]*radial-gradient/)
+  assert.doesNotMatch(displayStyles, /\.tv-performer-content::after/)
 })
 
 test('the full application loads the Spotlight identity after Scaffold', () => {
