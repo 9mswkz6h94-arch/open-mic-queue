@@ -8,7 +8,7 @@ import { useEventRecord } from '../lib/eventContext'
 import './TVDisplay.css'
 
 const PUBLIC_APP_URL = import.meta.env.VITE_PUBLIC_APP_URL || 'https://open-mic-queue.netlify.app'
-const EVENT_NAME = import.meta.env.VITE_EVENT_NAME || 'Brother Jons Song Writer Open Mic'
+const EVENT_NAME = import.meta.env.VITE_EVENT_NAME || "Brother Jon's Song Writer Open Mic"
 const SUPPORT_LINKS = [
   { label: 'Cash App', handle: '$rainbowheartstudio', url: 'https://cash.app/$rainbowheartstudio' },
   { label: 'Venmo', handle: '@rainbowheartstudio', url: 'https://venmo.com/rainbowheartstudio' },
