@@ -155,3 +155,11 @@ Complete responsive and workflow review of Spotlight across phone, tablet, deskt
 - Repacked the TV prompt vocabulary and guarded publish workflow so their complete controls remain visible in the fixed desktop preview region.
 - Expanded the venue ticker from a names-only marquee into a repeating show-status sequence: `On stage`, `On deck`, `Coming up`, `Already performed`, then any published ticker message.
 - Verification: 22 automated tests passed, the production Vite build completed with 114 modules, and rendered mock-isolated review covered the 1524×1252 Host Console plus a 1524×857 venue display. No production data, migrations, or deployment changed.
+
+## 0.9 — Action hierarchy and functional TV previews (2026-10-02)
+
+- Quick TV vocabulary buttons now place their exact copy directly over the embedded TV preview. The surface explicitly says `Preview only`; guarded publication remains in the adjacent workflow.
+- Both prompt regions now have contained scrolling, and the guarded publishing action row remains sticky so production controls cannot disappear below the fixed preview boundary.
+- Replaced five mutually exclusive gap buttons with a single `Room status` selector and a context-aware `Start/End room status` action. Forward show actions remain first, recording markers second, and performer/utility/destructive actions last.
+- Changed desktop upcoming-performer cards to one five-button action row, preserving 48px targets while reducing each card's height.
+- Verification: 23 automated tests passed, the production Vite build completed with 114 modules, and rendered/AX review confirmed the selected `Signup open` quick prompt appears on the TV preview. Exact-size local renders passed at 1524×1252 for the event-laptop Host Console and 1366×668 for the venue TV display, with no visible clipping or overlap. No production publication or deployment occurred.

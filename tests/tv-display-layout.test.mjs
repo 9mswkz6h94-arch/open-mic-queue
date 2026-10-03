@@ -128,3 +128,13 @@ test('host console removes the empty totals column and the TV ticker cycles full
   assert.match(displaySource, /publishedPrompt\?\.region === 'ticker'/)
   assert.match(displaySource, /Show status/)
 })
+
+test('host controls preview quick TV messages and compact mutually exclusive actions', () => {
+  assert.match(adminSource, /Quick preview · \{tvPromptDraft\.label\}/)
+  assert.match(adminSource, /Quick TV preview · Preview only/)
+  assert.match(productionControlsSource, /Room status/)
+  assert.match(productionControlsSource, /Start room status/)
+  assert.match(productionControlsSource, /onGap\(openGap \|\| selectedGap, note\)/)
+  assert.match(appStyles, /\.host-command-queue \.queue-actions \{\s*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);/)
+  assert.match(appStyles, /\.host-public-prompt-workflow \{[\s\S]*?overflow-y: auto;/)
+})

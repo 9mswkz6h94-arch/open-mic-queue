@@ -11,6 +11,8 @@ const GAP_TYPES = [
 export default function ProductionTimelineControls({ recording, status, onStartRecording, onStopRecording, onMarker, onDoNotPublish, doNotPublishOpen, onGap, openGap, onResync, onExport, cueCount, currentPerformer, currentSongIndex, currentSongTitle, songCount, onPreviousSong, onNextSong, onEditPerformer, onToggleFeatured, onFinishSet, onDeletePerformer }) {
   const [filename, setFilename] = useState('')
   const [note, setNote] = useState('')
+  const [selectedGap, setSelectedGap] = useState('changeover')
+  const activeGapLabel = GAP_TYPES.find(([code]) => code === openGap)?.[1]
 
   return (
     <section className="production-timeline production-button-board" aria-label="Recording timeline controls">
@@ -45,11 +47,17 @@ export default function ProductionTimelineControls({ recording, status, onStartR
         <button className="btn btn-outline btn-small" disabled={!recording} onClick={() => onMarker('highlight', note)}>Highlight</button>
         <button className="btn btn-outline btn-small" disabled={!recording} onClick={() => onMarker('audio_issue', note)}>Audio issue</button>
         <button className={`btn btn-small ${doNotPublishOpen ? 'btn-primary' : 'btn-outline'}`} disabled={!recording} onClick={() => onDoNotPublish(note)}>{doNotPublishOpen ? 'End do not publish' : 'Do not publish'}</button>
-        {GAP_TYPES.map(([code, label]) => <button key={code} className={`btn btn-small ${openGap === code ? 'btn-primary' : 'btn-outline'}`} disabled={!recording} onClick={() => onGap(code, note)}>{openGap === code ? `End ${label}` : label}</button>)}
+        <label className="production-gap-selector">
+          <span>Room status</span>
+          <select value={openGap || selectedGap} disabled={!recording || Boolean(openGap)} onChange={event => setSelectedGap(event.target.value)}>
+            {GAP_TYPES.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+          </select>
+        </label>
+        <button className={`btn btn-small ${openGap ? 'btn-primary' : 'btn-outline'}`} disabled={!recording} onClick={() => onGap(openGap || selectedGap, note)}>{openGap ? `End ${activeGapLabel}` : 'Start room status'}</button>
         <button className="btn btn-small btn-outline" disabled={!currentPerformer} onClick={onEditPerformer}>{currentPerformer?.entry_role === 'featured_artist' ? 'Edit featured set' : 'Edit performer'}</button>
         <button className="btn btn-small btn-outline" disabled={!currentPerformer} onClick={onToggleFeatured}>{currentPerformer?.entry_role === 'featured_artist' ? 'Remove feature' : 'Make featured'}</button>
-        <button className="btn btn-small btn-outline" disabled={!recording} onClick={() => onResync(note)}>Resync recording</button>
         <button className="btn btn-small btn-outline" disabled={!cueCount} onClick={onExport}>Export timeline</button>
+        <button className="btn btn-small btn-outline" disabled={!recording} onClick={() => onResync(note)}>Resync recording</button>
         <button className="btn btn-small btn-delete" disabled={!currentPerformer} onClick={onDeletePerformer}>Delete performer</button>
       </div>
     </section>

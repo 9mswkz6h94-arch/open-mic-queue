@@ -722,6 +722,34 @@
   white-space: normal;
 }
 
+.production-gap-selector {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+}
+
+.production-gap-selector span {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  left: 8px;
+  color: var(--scaffold-muted);
+  font-family: var(--scaffold-font-measurement);
+  font-size: 10px;
+  letter-spacing: .06em;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.production-gap-selector select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 15px 8px 3px;
+  font-size: var(--scaffold-text-meta);
+}
+
 .host-queue-heading {
   display: flex;
   align-items: center;
@@ -783,14 +811,28 @@
     padding: var(--scaffold-space-2);
   }
 
+  .host-tv-prompt-controls {
+    min-height: 0;
+    padding-right: 4px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
   .host-public-prompt-workflow {
-    overflow: visible;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 
   .host-public-prompt-actions {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: var(--scaffold-space-1);
+    position: sticky;
+    z-index: 2;
+    bottom: 0;
+    padding-top: var(--scaffold-space-2);
+    background: var(--scaffold-surface);
   }
 
   .host-public-prompt-actions .btn {
@@ -798,6 +840,10 @@
     min-width: 0;
     padding: 6px;
     white-space: normal;
+  }
+
+  .host-command-queue .queue-actions {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 

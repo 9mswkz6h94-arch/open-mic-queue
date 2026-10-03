@@ -910,9 +910,15 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
               <span>{publicPromptState.content}</span>
             </div>
           )}
+          {tvPromptDraft && publicPromptState?.status !== 'previewed' && (
+            <div className="host-tv-placement-preview is-ticker is-quick-preview">
+              <strong>Quick preview · {tvPromptDraft.label}</strong>
+              <span>{tvPromptDraft.content}</span>
+            </div>
+          )}
         </div>
         <div className="host-tv-prompt-controls">
-          <span className="eyebrow">Prompt vocabulary / Draft only</span>
+          <span className="eyebrow">Quick TV preview · Preview only</span>
           <div className="host-tv-prompt-buttons" role="group" aria-label="Choose a TV prompt draft">
             {tvPromptOptions.map(option => (
               <button
@@ -936,8 +942,8 @@ export default function Admin({ onEditPerformer, eventSlug, event }) {
             </button>
           </div>
           <div className="host-tv-prompt-draft" role="status" aria-live="polite">
-            <strong>{tvPromptDraft ? tvPromptDraft.label : 'No prompt drafted'}</strong>
-            <span>{tvPromptDraft ? tvPromptDraft.content : 'Choose a constrained prompt to preview its exact public copy.'}</span>
+            <strong>{tvPromptDraft ? `${tvPromptDraft.label} previewing on TV` : 'No quick preview selected'}</strong>
+            <span>{tvPromptDraft ? tvPromptDraft.content : 'Choose a message above. Use the publishing panel to send it to the venue display.'}</span>
           </div>
         </div>
         <div className="host-public-prompt-workflow">
